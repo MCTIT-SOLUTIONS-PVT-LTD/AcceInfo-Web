@@ -1,0 +1,23 @@
+﻿@inherits LayoutComponentBase
+
+<Header />
+<div class="page-wrapper">
+    <!--start page-wrapper-inner -->
+    <div class="page-wrapper-inner">
+        <Navbar />
+    </div>
+    <!--end page-wrapper-inner -->
+
+    <div class="page-content">
+       <div class="container-fluid">
+           @Body
+       </div>
+       <Footer />
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred 123.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

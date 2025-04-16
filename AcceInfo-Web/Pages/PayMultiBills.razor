@@ -1,0 +1,493 @@
+﻿@page "/pay-multi-bills"
+@layout MainLayout
+@inject NavigationManager NavigationManager
+
+<div class="row">
+                        <div class="col-lg-3">
+                            <div class="card">
+                                <div class="card-body profile-nav"> 
+                                    
+                                    
+                                    
+                                    <div class="nav flex-column nav-pills" id="profile-tab" aria-orientation="vertical">
+                                        <h5 class="my-4">Pay, Send & Receive Money</h5>
+
+                                        <a class="nav-link" id="pay-a-bill-tab" href="pay-a-bill.html" aria-selected="true">Pay a Bill</a>
+                                        <a class="nav-link" id="transfer-funds-tab" href="#transfer-funds" aria-selected="true">Transfer Funds</a>
+                                        <a class="nav-link" id="send-an-interac-e-transfer-tab" href="#send-an-interac-e-transfer" aria-selected="true"><em>Send an Interac e-Transfer</em></a>
+
+                                        <a class="nav-link" id="send-international-money-transfer-tab" href="#send-international-money-transfer" aria-selected="true">Send International Money Transfer</a>
+
+                                        <a class="nav-link" id="receive-a-wire-transfer-tab" href="#receive-a-wire-transfer" aria-selected="true">Receive a Wire Transfer</a>
+
+                    <a class="nav-link active" id="pay-multiple-bills-tab" href="/pay-multi-bills" aria-selected="true">Pay Multiple Bills</a>
+
+                                        <a class="nav-link" id="request-money-tab" href="#request-money" aria-selected="true">Request Money</a>
+
+                                        <a class="nav-link" id="register-for-interac-e-transfer-autoDeposit-tab" href="#register-for-interac-e-transfer-autoDeposit" aria-selected="true">Register for <em>Interac</em> e-Transfer AutoDeposit</a>
+
+                                        <a class="nav-link" id="transfer-funds-to-acce-us-banking-tab" href="#transfer-funds-to-acce-us-banking" aria-selected="true">Transfer Funds to ACCE US Banking</a>
+
+                                        <a class="nav-link" id="transfer-to-direct-investing-or-tnvestease-tab" href="#transfer-to-direct-investing-or-tnvestease" aria-selected="true">Transfer to Direct Investing or InvestEase</a>
+
+
+                                        <h5 class="my-4">Manage Payments & Transfers</h5>
+                                            <a class="nav-link" id="payment-history-tab" href="#payment-history" aria-selected="true">Payment History</a>
+                                            <a class="nav-link" id="manage-postdated-transactions-tab" href="#manage-postdated-transactions" aria-selected="true">Manage Postdated Transactions</a>
+                                            <a class="nav-link" id="cancel-bill-payment-tab" href="#cancel-bill-payment" aria-selected="true">Cancel Bill Payment</a>
+                                            <a class="nav-link" id="cancel-interac-e-transfer-tab" href="#cancel-interac-e-transfer" aria-selected="true"><em>Cancel Interac e-Transfer</em></a>
+
+                                        <h5 class="my-4">Add Payees & Recipients</h5>
+                                            <a class="nav-link" id="add-bill-payee-tab" href="#add-bill-payee" aria-selected="true">Add Bill Payee</a>
+                                            <a class="nav-link" id="add-canada-revenue-agency-payee-tab" href="#add-canada-revenue-agency-payee" aria-selected="true">Add Canada Revenue Agency Payee</a>
+                                            <a class="nav-link" id="add-interac-e-transfer-recipient-tab" href="#add-interac-e-transfer-recipient" aria-selected="true"><em>Add Interac e-Transfer Recipient</em></a>
+                                            <a class="nav-link" id="add-international-money-transfer-recipient-tab" href="#add-international-money-transfer-recipient" aria-selected="true">Add International Money Transfer Recipient</a>
+                                            <a class="nav-link" id="add-other-acce-bank-customer-tab" href="#add-other-acce-bank-customer" aria-selected="true">Add Other ACCE Bank Customer</a> 
+
+                                        <h5 class="my-4">Manage Payees & Recipients</h5>
+                                            <a class="nav-link" id="manage-payees-tab" href="#manage-payees" aria-selected="true">Manage Payees</a>
+                                            <a class="nav-link" id="manage-international-money-transfer-recipients-tab" href="#manage-international-money-transfer-recipients" aria-selected="true">Manage International Money Transfer Recipients</a>
+                                            <a class="nav-link" id="sort-payee-list-tab" href="#sort-payee-list" aria-selected="true">Sort Payee List</a>
+                                            <a class="nav-link" id="nickname-payees-tab" href="#nickname-payees" aria-selected="true">Nickname Payees</a>         
+
+                                    </div>
+
+                                    <div class="nav-container">
+                                        <div class="nav-items" onclick="toggleDropdown('alertCentre', this)">
+                                            Alert Centre <span>›</span>
+                                        </div>
+                                        <div id="alertCentre" class="dropdown">
+                                            <a href="#">View Alerts</a>
+                                            <a href="#">Manage Notifications</a>
+                                        </div>
+
+                                        <div class="nav-items" onclick="toggleDropdown('profilePreferences', this)">
+                                            Profile and Preferences <span>›</span>
+                                        </div>
+                                        <div id="profilePreferences" class="dropdown">
+                                            <a href="#">Update Profile</a>
+                                            <a href="#">Change Password</a>
+                                        </div>
+
+                                        <div class="nav-items" onclick="toggleDropdown('productsServices', this)">
+                                            Apply for Products and Services <span>›</span>
+                                        </div>
+                                        <div id="productsServices" class="dropdown">
+                                            <a href="#">Credit Cards</a>
+                                            <a href="#">Loans</a>
+                                            <a href="#">Insurance</a>
+                                        </div>
+                                    </div>
+                                </div><!--end card-body-->
+                            </div><!--end card-->
+
+                           
+
+                            
+                        </div><!--end col-->
+
+                        <div class="col-lg-9">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="tab-content" id="profile-tabContent">
+                                        <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
+                                            <h3 class="text-primary">Pay  Multiple Bills</h3>
+
+                                             <div class="row">
+                                                <div class="col-md-9">
+                                                    <p>Paying several bills at once is easy. Just select a payee and enter an amount for each bill.</p>
+
+                                                    <p>If you're paying someone new, don't forget to add new payees to your list first.</p>
+
+                                                    <p>Remember that your bills will be paid in the order you enter them below. If your account runs out of funds to pay for a bill in your list, all items following it won't be processed either. So make sure to put the most important ones first.</p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <button type="button" class="btn btn-outline-info waves-effect waves-light mb-2"><i class="mdi mdi-account-multiple-plus mr-2"></i>Add bill payee</button>                                                                            </div>
+
+                                                </div>
+                                            </div>                                   
+                                            <div class="row">
+                                                            
+                                                <div class="col-md-12 align-self-center">
+                                                    <form class="mb-0">
+                                                        
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">From:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Chequing 00022-5210315</option>
+                                                                            <option value="user1">Chequing 00022-5210315</option>
+                                                                            <option value="user2">Chequing 00022-5210315</option>
+                                                                            <option value="user3">Chequing 00022-5210315</option>
+                                                                            <option value="user4">Chequing 00022-5210315</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                                
+                                                        </div>
+
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">To:</span>
+                                                                        </div>
+                                                                        <select id="example-select-group" name="example-select-group" class="form-control">
+                                                                            <option selected disabled>Select payee</option>
+                                                                            <option value="user1">User 1</option>
+                                                                            <option value="user2">User 2</option>
+                                                                            <option value="user3">User 3</option>
+                                                                            <option value="user4">User 4</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                        </div>
+                                                                        <input type="text" id="example-input1-group1" name="example-input1-group1" class="form-control" placeholder="Enter Amount">
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+                                                        </div>
+                                                        
+                                                        <div class="row">
+                                                            
+                                                            <div class="col-md-12">
+                                                                <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-end">
+                                                                    <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right">Continue</button>
+                                                                </div>             
+                                                            </div>
+                                                        </div> 
+
+                                                        <br />
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <div class="alert alert-outline-primary mb-0" role="alert">
+                                                                    <h4 class="alert-heading font-18"><i class="fas fa-comments"></i> When are my transactions processed?</h4>
+                                                                    <p>Transactions you make on business days before 6:00 pm will be processed by us the same day.</p>
+                                                                    <p>Transactions made at all other times will be processed by us the next business day.</p>
+                                                                    <p>Payments to third parties (such as utility bills and non-RBC credit cards) often need more processing time by the third party -- which generally takes up to 3 days.</p>
+                                                                </div>                                                                            
+                                                            </div>
+                                                            
+                                                        </div>                                           
+                                                    </form>
+                                                    
+                                                </div><!--end col-->
+                                            </div><!--end row--> 
+                                                                                    
+                                        </div><!--end tab-pane-->
+
+                                        <div class="tab-pane fade" id="request-money">
+                                            <h4 class="mt-0 header-title mb-3">Request Money</h4>
+                                            
+                                        </div><!--end tab-pane-->
+
+                                        <div class="tab-pane fade" id="cancel-bill-payment">
+                                            <h4 class="mt-0 header-title mb-3">Cancel Bill Payment</h4>
+                                            
+                                        </div><!--end tab-pen-->
+
+                                        <div class="tab-pane fade" id="pay-multiple-bills">
+                                            <h4 class="mt-0 header-title mb-3">Pay Multiple Bills</h4>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    
+                                                </div> <!--end col-->                                          
+                                            </div><!--end row-->
+                                        </div><!--end tab-pane-->
+                                    </div>  <!--end tab-content-->                                                                              
+                                </div><!--end card-body-->
+                            </div><!--end card-->
+                        </div><!--end row-->
+                    
+
+@code {
+
+}
