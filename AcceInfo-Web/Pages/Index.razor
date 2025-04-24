@@ -1,8 +1,12 @@
-﻿@page "/index"
+﻿@page "/"
+@using Blazored.LocalStorage
 @layout MainLayout
 @inject NavigationManager NavigationManager
-
-
+@inject ILocalStorageService LocalStorage
+@* change *@
+@* @using Blazored.LocalStorage
+@inject ILocalStorageService LocalStorage *@
+@* change *@
 
 @* <div class="container-fluid"> *@
     <div class="row">
@@ -23,7 +27,7 @@
                                             </div> -->
                                             <div class="fro_profile_user-detail mt-4">
                                                 <h4 class="fro_user-name text-primary">Good Morning,</h4>
-                                                <h5 class="fro_user-name text-primary">Welcome, G.Raymond</h5>
+                                            <h5 class="fro_user-name text-primary">Welcome, @FirstName  @LastName</h5>
                                                 <a href="#" class="mb-0 fro_user-name-post text-primary">Go to ACCE Business Banking</a>
                                             </div>
                                         </div>
@@ -469,4 +473,25 @@
 
 @code {
 
+    private string UserName = "";
+    private string FirstName = "";
+    private string LastName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserName = await LocalStorage.GetItemAsync<string>("user_name") ?? "";
+        FirstName = await LocalStorage.GetItemAsync<string>("user_firstName") ?? "";
+        LastName = await LocalStorage.GetItemAsync<string>("user_lastName") ?? "";
+    }
+
+    //change
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var token = await LocalStorage.GetItemAsync<string>("auth_token");
+    //     if (string.IsNullOrWhiteSpace(token))
+    //     {
+    //         NavigationManager.NavigateTo("/login", true);
+    //     }
+    // }
+    //change
 }

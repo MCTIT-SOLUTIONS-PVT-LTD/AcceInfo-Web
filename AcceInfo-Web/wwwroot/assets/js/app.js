@@ -9,16 +9,16 @@
 
     'use strict';
 
-    function initSlimscroll() {
-        $('.slimscroll').slimscroll({
-            height: 'auto',
-            position: 'right',
-            size: "7px",
-            color: '#9ea5ab',
-            wheelStep: 5,
-            touchScrollStep: 50
-        });
-    }
+    //function initSlimscroll() {
+    //    $('.slimscroll').slimscroll({
+    //        height: 'auto',
+    //        position: 'right',
+    //        size: "7px",
+    //        color: '#9ea5ab',
+    //        wheelStep: 5,
+    //        touchScrollStep: 50
+    //    });
+    //}
 
     function initMetisMenu() {
         $('.navbar-toggle').on('click', function (event) {
@@ -73,7 +73,7 @@
    
 
     function init() {
-        initSlimscroll();
+        // initSlimscroll();
         initMetisMenu();
         initLeftMenuCollapse();
         initEnlarge();

@@ -1,0 +1,223 @@
+﻿@page "/request-money"
+@layout MainLayout
+@inject NavigationManager NavigationManager
+
+<div class="row">
+
+    <SideNavSlider />
+
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-content" id="profile-tabContent">
+                    <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
+                        <h3 class="text-primary"><u> Request Money </u></h3>
+                        <br />
+                        <!-- Request Summary Modal -->
+                        <div class="modal fade" id="requestSummaryModal" tabindex="-1" role="dialog" aria-labelledby="requestSummaryModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title"> </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span>&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body" id="requestSummaryContent">
+                                        Loading...
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary">Confirm Request</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div>
+                                <div>
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-9">
+                                            <div class="col-md-12 align-self-center">
+                                                <form id="requestForm">
+                                                    <!-- Request From -->
+                                                    <div class="form-group">
+                                                        <label for="requestFrom">Request from</label>
+                                                        <select class="form-control" id="requestFrom">
+                                                            <option>Select</option>
+                                                            <option>Chequing-100108226953 = $51,538.78</option>
+                                                            <option>Savings-100108226953 = $51,538.78</option>
+                                                        </select>
+                                                        <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn">+ Add contact</button>
+                                                    </div>
+
+                                                    <!-- Send Request To -->
+                                                    <div class="form-group">
+                                                        <label for="sendRequestTo">Send request to</label>
+                                                        <select class="form-control" id="sendRequestTo">
+                                                            <option>Select</option>
+                                                            <option>John Doe</option>
+                                                            <option>Jane Doe</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Contact Legal Name -->
+                                                    <div class="form-group">
+                                                        <label for="contactLegalName">Contact legal name</label>
+                                                        <input type="text" class="form-control" id="contactLegalName" placeholder="John Doe">
+                                                    </div>
+
+                                                    <!-- Deposit To -->
+                                                    <div class="form-group">
+                                                        <label for="depositTo">Deposit to</label>
+                                                        <select class="form-control" id="depositTo">
+                                                            <option>Select</option>
+                                                            <option>Chequing-100108226953 = $51,538.78</option>
+                                                            <option>Savings-100108226953 = $51,538.78</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Amount -->
+                                                    <div class="form-group">
+                                                        <label for="amount">Amount</label>
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control" id="amount" placeholder="$0.00">
+                                                            <select class="form-control">
+                                                                <option>CAD</option>
+                                                                <option>USD</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Invoice Number -->
+                                                    <div class="form-group">
+                                                        <label for="invoiceNumber">Invoice number (optional)</label>
+                                                        <input type="text" class="form-control" id="invoiceNumber" placeholder="Optional">
+                                                    </div>
+
+                                                    <!-- Invoice Due Date -->
+                                                    <div class="form-group">
+                                                        <label for="invoiceDueDate">Invoice due date (optional)</label>
+                                                        <input type="date" class="form-control" id="invoiceDueDate">
+                                                    </div>
+
+                                                    <!-- Message -->
+                                                    <div class="form-group">
+                                                        <label for="message">Message (optional)</label>
+                                                        <textarea class="form-control" id="message" rows="3" placeholder="Your message here"></textarea>
+                                                    </div>
+
+                                                    <!-- Consent Checkbox -->
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="consent" required>
+                                                        <label class="form-check-label" for="consent">
+                                                            I have consent from the recipient to send this request.
+                                                        </label>
+                                                    </div>
+
+                                                    <!-- Action Buttons -->
+                                                    <div class="row justify-content-end">
+                                                        <div class="col-md-3 mb-4">
+                                                            <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
+                                                                <button type="reset" class="btn btn-outline-primary waves-effect waves-light btn-pd-left-right w-100">Clear</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3 mb-4">
+                                                            <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
+                                                                <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right w-100" id="openSummaryModal">
+                                                                    Continue
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div><!--end col-->
+                                        </div>
+
+                                    </div><!--end row-->
+                                </div>
+                                <div class="tab-pane fade mt-4" id="pills-about-brand">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <img src="assets/images/products/2.jpg" alt="" height="150" class="d-block mx-auto">
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <span class="bg-soft-danger rounded-pill px-3 py-2 font-weight-bold">Frogetor</span>
+                                            <h5 class="mt-3">It is a long established fact that a reader will be distracted</h5>
+                                            <p class="text-muted mb-0">
+                                                There are many variations of passages of Lorem Ipsum available,
+                                                but the majority have suffered alteration in some form, by injected humour,
+                                                or randomised words which don't look even slightly believable.
+                                                If you are going to use a passage.
+                                            </p>
+                                        </div><!--end col-->
+                                        <div class="col-lg-4">
+                                            <ul class="list-unstyled">
+                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>It is a long established fact that a reader will be distracted.</li>
+                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>Contrary to popular belief, Lorem Ipsum is not text.</li>
+                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>There are many variations of passages of Lorem.</li>
+                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>It is a long established fact that a reade.</li>
+                                            </ul>
+                                        </div><!--end col-->
+                                    </div><!--end row-->
+                                </div>
+                                <div class="tab-pane fade mt-4" id="pills-custom">
+                                    <div class="row">
+                                        <div class="col-lg-4">
+                                            <div class="pro-order-box mb-2 mb-lg-0">
+                                                <i class="mdi mdi-white-balance-sunny text-warning"></i>
+                                                <h4 class="header-title">Seff from Sunlight</h4>
+                                                <p class="text-muted">
+                                                    Contrary to popular belief, Lorem Ipsum is.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="pro-order-box mb-2 mb-lg-0">
+                                                <i class="mdi mdi-fire text-danger"></i>
+                                                <h4 class="header-title">Not Seff from Fire </h4>
+                                                <p class="text-muted">
+                                                    It is a long established fact that.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="pro-order-box mb-2 mb-lg-0">
+                                                <i class="mdi mdi-glass-wine text-success"></i>
+                                                <h4 class="header-title">Seff from liqvid</h4>
+                                                <p class="text-muted">
+                                                    There are many variations of passages.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!--end tab-pane-->
+
+                    <div class="tab-pane fade" id="request-money">
+                        <h4 class="mt-0 header-title mb-3">Request Money</h4>
+
+                    </div><!--end tab-pane-->
+
+                    <div class="tab-pane fade" id="cancel-bill-payment">
+                        <h4 class="mt-0 header-title mb-3">Cancel Bill Payment</h4>
+
+                    </div><!--end tab-pen-->
+
+                    <div class="tab-pane fade" id="pay-multiple-bills">
+                        <h4 class="mt-0 header-title mb-3">Pay Multiple Bills</h4>
+                        <div class="row">
+                            <div class="col-lg-12">
+                            </div> <!--end col-->
+                        </div><!--end row-->
+                    </div><!--end tab-pane-->
+                </div>  <!--end tab-content-->
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div><!--end col-->
+</div><!--end row-->
+@code {
+
+}

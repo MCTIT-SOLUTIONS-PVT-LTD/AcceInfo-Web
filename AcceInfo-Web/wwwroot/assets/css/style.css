@@ -2255,7 +2255,7 @@ a.bg-primary:focus, a.bg-primary:hover, button.bg-primary:focus, button.bg-prima
   color: #5d5b6f;
 }
 
-.btn-secondary.active, .btn-secondary.focus, .btn-secondary:active, .btn-secondary:focus, .btn-secondary:hover,
+/*.btn-secondary.active, .btn-secondary.focus, .btn-secondary:active, .btn-secondary:focus, .btn-secondary:hover,
 .open > .dropdown-toggle.btn-secondary, .btn-outline-secondary.active, .btn-outline-secondary:active,
 .show > .btn-outline-secondary.dropdown-toggle, .btn-outline-secondary:hover,
 .btn-secondary.active, .btn-secondary:not(:disabled):not(.disabled):active,
@@ -2270,7 +2270,7 @@ a.bg-secondary:focus, a.bg-secondary:hover, button.bg-secondary:focus, button.bg
   background-color: #d1d1e9 !important;
   border: 1px solid #d1d1e9;
   color: #5d5b6f;
-}
+}*/
 
 .btn-secondary:not(:disabled):not(.disabled):active:focus, .show > .btn-secondary.dropdown-toggle:focus,
 .btn-secondary.focus, .btn-secondary:focus, .btn-outline-secondary.focus, .btn-outline-secondary:focus {
@@ -8188,4 +8188,127 @@ tr:first-child > td > .fc-day-grid-event {
   border: 1px solid #00bcd4;
 }
 
+
+.btn-light:active, .btn-light:focus, .btn-light:hover, .btn-light.active, .btn-light.focus, .btn-light:active, .btn-light:focus, .btn-light:hover, .open > .dropdown-toggle.btn-light, .btn-outline-light.active, .btn-outline-light:active, .show > .btn-outline-light.dropdown-toggle, .btn-outline-light:hover, .btn-light.active, .btn-light.disabled, .btn-light:disabled, .btn-outline-light:not(:disabled):not(.disabled).active, .btn-outline-light:not(:disabled):not(.disabled):active, .show > .btn-outline-light.dropdown-toggle, .btn-light:active, .show > .btn-light.dropdown-toggle {
+    background-color: #004D6E;
+    border: 1px solid #e9ecef;
+    color: #fff;
+}
+
+.btn-outline-light:not(:disabled):not(.disabled).active, .btn-outline-light:not(:disabled):not(.disabled):active, .show > .btn-outline-light.dropdown-toggle {
+    color: #fff;
+}
+
+/* Hover */
+.btn-outline-secondary:hover {
+    background-color: #004D6E !important;
+    color: #fff;
+    border-color: #004D6E;
+}
+
+.btn-secondary.active, .btn-secondary.focus, .btn-secondary:active, .btn-secondary:focus, .btn-secondary:hover, .open > .dropdown-toggle.btn-secondary, .btn-outline-secondary.active, .btn-outline-secondary:active, .show > .btn-outline-secondary.dropdown-toggle, .btn-outline-secondary:hover, .btn-secondary.active, .btn-secondary:not(:disabled):not(.disabled):active, .btn-outline-secondary:not(:disabled):not(.disabled).active, .btn-outline-secondary:not(:disabled):not(.disabled):active, .btn-secondary:not(:disabled):not(.disabled).active, .btn-secondary:not(:disabled):not(.disabled):active, .show > .btn-secondary.dropdown-toggle, .show > .btn-outline-secondary.dropdown-toggle, .btn-secondary:active, .show > .btn-secondary.dropdown-toggle, .btn-secondary.disabled, .btn-secondary:disabled, a.bg-secondary:focus, a.bg-secondary:hover, button.bg-secondary:focus, button.bg-secondary:hover {
+    background-color: #004D6E;
+    border: 1px solid #e9ecef;
+    color: #fff;
+}
+
+/* Active (selected) */
+.btn-outline-secondary.active,
+.btn-outline-secondary:active,
+.btn-outline-secondary input[type="radio"]:checked + label {
+    background-color: #004D6E !important;
+    color: #fff !important;
+    border-color: #004D6E !important;
+}
+
+/* Optional: Prevent text color reset */
+.btn-outline-secondary input[type="radio"] {
+    display: none; /* Hide radio input if desired */
+}
+
+
+.input-error-border {
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+
+/* Customize DataTable appearance */
+.dataTables_wrapper {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+}
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 1rem;
+    }
+
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.4em 0.8em;
+        margin-left: 4px;
+        background-color: #004D6E;
+        color: white !important;
+        border: none;
+        border-radius: 4px;
+    }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #004D6E !important;
+            font-weight: bold;
+            color: white !important;
+        }
+
+    .dataTables_wrapper .dataTables_info {
+        margin-top: 10px;
+        color: #333;
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+        padding: 4px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+table.dataTable thead th {
+    background-color: #004D6E;
+    color: white;
+    border-bottom: 2px solid #003B5C;
+}
+
+table.dataTable tbody td {
+    padding: 8px 10px;
+}
+
+
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+
+.validation-message {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    color: #fff !important;
+}
 /* MCT DEV END */

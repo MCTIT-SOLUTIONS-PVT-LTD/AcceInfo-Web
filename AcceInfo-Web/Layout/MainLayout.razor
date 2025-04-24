@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using Blazored.LocalStorage
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
 
 <Header />
 <div class="page-wrapper">
@@ -16,8 +19,20 @@
     </div>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("auth_token");
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            NavigationManager.NavigateTo("/login", true);
+        }
+    }
+}
+
+
+@* <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred 123.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
-</div>
+</div> *@
