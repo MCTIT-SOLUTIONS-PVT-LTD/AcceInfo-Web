@@ -54,3 +54,8 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 /AcceInfo-Web/.vs
+/.vs/AcceInfo-Web-Prakash/config
+/.vs/AcceInfo-Web-Prakash/FileContentIndex
+/.vs/AcceInfo-Web-Prakash/v17
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
