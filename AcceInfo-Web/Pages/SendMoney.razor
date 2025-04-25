@@ -1,0 +1,170 @@
+﻿@page "/send-money"
+@layout MainLayout
+@inject NavigationManager NavigationManager
+
+<div class="row">
+
+    <SideNavSlider />
+
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-content" id="profile-tabContent">
+                    <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
+                        <h3 class="text-primary"><u>Send money</u></h3>
+                        <!-- Modal (Keep the same modal, just update the body content) -->
+                        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Transfer Summary</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+
+                                        <p id="summaryContent">Loading...</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary">Confirm Transfer</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.modal -->
+                        <br />
+
+                        <div class="row">
+
+                            <div class="col-md-12">
+                                <div class="row justify-content-center">
+                                    <div class="col-md-9">
+                                        <form id="my-acccount-form" class="mb-0">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="requestFrom">Transfer from</label>
+                                                        <select class="form-control" id="requestFrom">
+                                                            <option>Select</option>
+                                                            <option>Chequing-100108226953 = $51,538.78</option>
+                                                            <option>Savings-100108226953 = $51,538.78</option>
+                                                        </select>
+                                                        <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn">+ Add payee</button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Send To <small class="text-danger font-13">*</small></label>
+                                                        <select class="form-control" name="transferTo">
+                                                            <option>Select</option>
+                                                            <option>Savings-100108226953 = $51,538.78</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Amount <small class="text-danger font-13">*</small></label>
+                                                        <input type="text" name="amount" class="form-control" placeholder="$0.00" id="amount">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Currency</label>
+                                                        <select class="form-control" name="currency">
+                                                            <option>CAD</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label class="col-form-label pt-0">Message</label>
+                                                        <input class="form-control" type="text" id="memo">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row justify-content-end">
+                                                <div class="col-md-3">
+                                                    <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
+                                                        <button type="reset" class="btn btn-outline-primary waves-effect waves-light btn-pd-left-right w-100">Clear</button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
+                                                        <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right w-100" data-toggle="modal" data-animation="bounce" data-target=".bs-example-modal-lg" id="openSummaryModal">Continue</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <br />
+
+                                        </form>
+                                    </div>
+                                    <div class="row single-pro-info-tab" style="border:none;">
+                                        <div class="col-md-12">
+                                            <div class="alert alert-outline-primary mb-0" role="alert">
+                                                <h4 class="alert-heading font-18"><i class="fas fa-info-circle"></i> When are my transactions processed?</h4>
+                                                <p>
+                                                    After you initiate an <em>Interac</em> e-Transfer, we will withdraw the chosen amount from the account selected and
+                                                    send an email or text message notification to the <em>Interac</em> e-Transfer recipient at the email address or mobile
+                                                    number that you provide. The email or text message notification will identify you as the sender and contain
+                                                    the <em>Interac</em> e-Transfer amount, the name of the <em>Interac</em> e-Transfer recipient, and that you are using
+                                                    <em>Interac</em> e-Transfer.
+                                                </p>
+
+                                                <p>
+                                                    An <em>Interac</em> e-Transfer recipient can claim or decline the <em>Interac</em> e-Transfer using Online and Mobile Banking,
+                                                    the online and mobile banking services of another financial institution.
+                                                </p>
+
+                                                <p>
+                                                    ACCE and other financial institutions participating in <em>Interac</em> e-Transfer, the owner of the <em>Interac</em> e-Transfer
+                                                    service, are entitled to pay an <em>Interac</em> e-Transfer to anyone who, in using Online or Mobile Banking, or the
+                                                    online or mobile banking service of another financial institution, claims the <em>Interac</em> e-Transfer and where
+                                                    applicable, correctly responds to the <em>Interac</em> e-Transfer question, whether you intended that person to receive
+                                                    the <em>Interac</em> e-Transfer or not.
+                                                </p>
+
+                                                <p>You are responsible for providing a correct and operational email address and/or mobile number for the transaction.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div><!--end col-->
+                        </div><!--end row-->
+                    </div><!--end tab-pane-->
+
+                    <div class="tab-pane fade" id="request-money">
+                        <h4 class="mt-0 header-title mb-3">Request Money</h4>
+
+                    </div><!--end tab-pane-->
+
+                    <div class="tab-pane fade" id="cancel-bill-payment">
+                        <h4 class="mt-0 header-title mb-3">Cancel Bill Payment</h4>
+
+                    </div><!--end tab-pen-->
+
+                    <div class="tab-pane fade" id="pay-multiple-bills">
+                        <h4 class="mt-0 header-title mb-3">Pay Multiple Bills</h4>
+                        <div class="row">
+                            <div class="col-lg-12">
+                            </div> <!--end col-->
+                        </div><!--end row-->
+                    </div><!--end tab-pane-->
+                </div>  <!--end tab-content-->
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div><!--end col-->
+</div><!--end row-->
+@code {
+
+}

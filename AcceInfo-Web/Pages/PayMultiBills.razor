@@ -1,0 +1,460 @@
+﻿@page "/pay-multi-bills"
+@layout MainLayout
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+@using System.Text.Json
+@using System.Net.Http.Headers
+@using System.Text
+
+
+@if (IsLoading)
+{
+    <div class="spinner-overlay">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
+
+<div class="row">
+    <SideNavSlider />
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-content" id="profile-tabContent">
+                    <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
+                        <h3 class="text-primary">Pay Multiple Bills</h3>
+
+                        @if (ShowSuccessMessage)
+                        {
+                            <div class="row mt-4">
+                                <div class="col-md-9 offset-md-1">
+                                    <div class="card border border-primary shadow-sm">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted">Your bills have been paid successfully. Below is a summary of the transaction.</p>
+
+                                            <dl class="row">
+                                                <dt class="col-sm-4">From Account:</dt>
+                                                <dd class="col-sm-8">
+                                                    @Accounts.FirstOrDefault(a => a.AccountId == SelectedTransferFrom)?.AccountName
+                                                    (@GetAccountNumberById(SelectedTransferFrom))
+                                                </dd>
+
+                                                <dt class="col-sm-4">Payment Date:</dt>
+                                                <dd class="col-sm-8">@DateTime.UtcNow.ToString("MMMM dd, yyyy")</dd>
+                                            </dl>
+
+                                            <hr />
+
+                                            <h6>Paid To:</h6>
+                                            <table class="table table-striped table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Payee</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var (item, index) in BillPayees.Select((val, i) => (val, i + 1)))
+                                                    {
+                                                        var payee = PayeeList.FirstOrDefault(p => p.PayeeId == item.PayeeId);
+                                                        <tr>
+                                                            <td>@index</td>
+                                                            <td>@payee?.PayeeName - <b> @payee?.PayeeTypeName </b>  - @payee?.PayeeNumber </td>
+                                                            <td>@($"{Convert.ToDecimal(item.Amount):C2}")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+
+                                            <div class="text-right mt-3">
+                                                <div class="row justify-content-end">
+                                                    <div class="col-md-3">
+                                                        <button class="btn btn-outline-primary w-100" @onclick="@(() => NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true))">
+                                                            <i class="fas fa-check-circle"></i> Done
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-9">
+                                <p>Paying several bills at once is easy. Just select a payee and enter an amount for each bill.</p>
+                                <p>If you're paying someone new, don't forget to add new payees to your list first.</p>
+                                <p>Remember that your bills will be paid in the order you enter them below. If your account runs out of funds to pay for a bill in your list, all items following it won't be processed either. So make sure to put the most important ones first.</p>
+                            </div>
+                        </div>
+                        @if (!ShowConfirmation)
+                        {
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2" @onclick="AddPayeeRow">
+                                        <i class="mdi mdi-account-multiple-plus mr-2"></i>Add bill payee
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
+                        @if (ShowConfirmation)
+                        {
+                            <div class="row mt-4">
+                                <div class="col-md-9 offset-md-1">
+                                    <div class="card border border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0">Confirm Bill Payment</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>From Account:</strong> @Accounts.FirstOrDefault(a => a.AccountId == SelectedTransferFrom)?.AccountName (@GetAccountNumberById(SelectedTransferFrom))</p>
+                                            <table class="table table-bordered mt-3">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Payee To</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var (item, index) in BillPayees.Select((val, i) => (val, i + 1)))
+                                                    {
+                                                        var payee = PayeeList.FirstOrDefault(p => p.PayeeId == item.PayeeId);
+                                                        <tr>
+                                                            <td>@index</td>
+                                                            <td>@payee?.PayeeName  - <b> @payee?.PayeeTypeName </b> - @payee?.PayeeNumber</td>
+                                                            <td>@($"{Convert.ToDecimal(item.Amount):C2}")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+
+                                            <div class="text-right mt-3">
+                                                <div class="row justify-content-end">
+                                                    <div class="col-md-3">
+                                                        <button class="btn btn-outline-primary w-100" @onclick="() => ShowConfirmation = false">Back</button>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <button class="btn btn-primary w-100" @onclick="SubmitPayMultiBill">Confirm & Pay</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row">
+                                <div class="col-md-12 align-self-center">
+                                    <EditForm Model="@this" OnValidSubmit="ValidateAndContinue">
+                                        <div class="row justify-content-center">
+                                            <div class="col-md-9">
+                                                <div class="row">
+                                                    <div class="col-md-8">
+                                                        <div class="form-group">
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text">From:</span>
+                                                                </div>
+                                                                <select class="form-control" @bind="SelectedTransferFrom">
+                                                                    <option value="">Select</option>
+                                                                    @foreach (var account in Accounts)
+                                                                    {
+                                                                        <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                                    }
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                @foreach (var item in BillPayees)
+                                                {
+                                                    var index = BillPayees.IndexOf(item);
+                                                    <div class="row mb-2">
+                                                        <div class="col-md-8">
+                                                            <div class="form-group">
+                                                                <div class="input-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text">To:</span>
+                                                                    </div>
+                                                                    <select class="form-control" @bind="item.PayeeId">
+                                                                        <option value="">Select payee</option>
+                                                                        @foreach (var payee in PayeeList)
+                                                                        {
+                                                                            <option value="@payee.PayeeId">@payee.PayeeName - @payee?.PayeeTypeName - @payee.PayeeNumber</option>
+                                                                        }
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-group">
+                                                                <div class="input-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                                                    </div>
+                                                                    <input type="text" class="form-control" placeholder="Enter Amount" @bind="item.Amount">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <button type="button" class="btn btn-danger btn-sm float-right" @onclick="() => RemovePayeeRow(index)">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-end">
+                                                            <button type="submit" class="btn btn-primary waves-effect waves-light btn-pd-left-right">Continue</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </EditForm>
+                                </div>
+                            </div>
+                        }
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-outline-primary mb-0" role="alert">
+                                    <h4 class="alert-heading font-18"><i class="fas fa-comments"></i> When are my transactions processed?</h4>
+                                    <p>Transactions you make on business days before 6:00 pm will be processed by us the same day.</p>
+                                    <p>Transactions made at all other times will be processed by us the next business day.</p>
+                                    <p>Payments to third parties (such as utility bills and non-RBC credit cards) often need more processing time by the third party -- which generally takes up to 3 days.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<AccountModel> Accounts = new();
+    private List<PayeeItem> PayeeList = new();
+    private List<BillPayee> BillPayees = new() { new BillPayee(), new BillPayee() };
+    private bool IsLoading = false;
+
+    private string SelectedTransferFrom = "";
+    private string ContactId = "";
+    private string AuthToken = "";
+    private bool ShowConfirmation = false;
+    private bool ShowSuccessMessage = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthToken = await LocalStorage.GetItemAsync<string>("auth_token") ?? string.Empty;
+        ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? string.Empty;
+        await FetchAccounts();
+        await LoadPayees();
+    }
+
+    private async Task LoadPayees()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/getpayeelist");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var baseResponse = JsonSerializer.Deserialize<ApiResponse<List<PayeeItem>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (baseResponse?.Data != null)
+                    PayeeList = baseResponse.Data;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error loading payee list: " + ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetAccountNumberById(string accountId)
+    {
+        var account = Accounts.FirstOrDefault(a => a.AccountId == accountId);
+        return account != null ? account.AccountNumber : string.Empty;
+    }
+
+    private async Task FetchAccounts()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/accounts/cust-account?ContactId={ContactId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<AccountModel>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (result?.Status == "Success")
+                    Accounts = result.Data;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching accounts: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void AddPayeeRow() => BillPayees.Add(new BillPayee());
+
+    private void RemovePayeeRow(int index)
+    {
+        if (BillPayees.Count > 2)
+            BillPayees.RemoveAt(index);
+    }
+
+    private void ValidateAndContinue()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        var hasEmpty = BillPayees.Any(p => string.IsNullOrWhiteSpace(p.PayeeId) || string.IsNullOrWhiteSpace(p.Amount));
+        var hasDuplicate = BillPayees.Select(p => p.PayeeId).Where(x => !string.IsNullOrWhiteSpace(x)).GroupBy(x => x).Any(g => g.Count() > 1);
+
+        if (string.IsNullOrWhiteSpace(SelectedTransferFrom))
+        {
+            JS.InvokeVoidAsync("alert", "Please select a 'From' account.");
+        }
+        else if (hasEmpty)
+        {
+            JS.InvokeVoidAsync("alert", "Please select all payees and enter valid amounts.");
+        }
+        else if (hasDuplicate)
+        {
+            JS.InvokeVoidAsync("alert", "You cannot select the same payee more than once.");
+        }
+        else
+        {
+            ShowConfirmation = true;
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task SubmitPayMultiBill()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+            var toAccountList = BillPayees.Select(p => new
+            {
+                AccountNumberTo = p.PayeeId,
+                Amount = decimal.TryParse(p.Amount, out var amt) ? amt : 0,
+                Currency = "CAD",
+                Frequency = "Once",
+                StartDate = today,
+                EndDate = today,
+                Memo = (string?)null
+            }).ToList();
+
+            var requestBody = new
+            {
+                AccountNumberFrom = SelectedTransferFrom,
+                ToAccountNumbers = toAccountList
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post,
+                "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/accounts/PayBill");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+
+            var response = await Http.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowSuccessMessage = true;
+                ShowConfirmation = false;
+                StateHasChanged();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", $"❌ Error: {response.StatusCode}\n{content}");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"❗ Exception: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    public class PayeeItem
+    {
+        public string PayeeId { get; set; }
+        public string PayeeName { get; set; }
+        public string PayeeNumber { get; set; }
+        public string PayeeTypeName { get; set; }
+        public string PayeeType { get; set; }
+    }
+
+    public class BillPayee
+    {
+        public string PayeeId { get; set; }
+        public string Amount { get; set; }
+    }
+
+    public class ApiResponse<T>
+    {
+        public string Status { get; set; }
+        public T Data { get; set; }
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+    }
+
+    public class AccountModel
+    {
+        public string AccountId { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNumber { get; set; }
+        public decimal Balance { get; set; }
+    }
+}
