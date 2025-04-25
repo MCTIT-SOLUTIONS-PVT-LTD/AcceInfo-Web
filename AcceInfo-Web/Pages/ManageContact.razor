@@ -89,7 +89,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Name</label>
+                            <label>Name <small class="text-danger font-13">*</small></label>
                         <input class="form-control @(SubmitAttempted && string.IsNullOrWhiteSpace(NewContact.Name) ? "is-invalid" : "")"
                                @bind="NewContact.Name" />
                         @if (SubmitAttempted && string.IsNullOrWhiteSpace(NewContact.Name))
@@ -104,7 +104,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Phone Number</label>
+                            <label>Phone Number <small class="text-danger font-13">*</small></label>
                         <div class="input-group">
                             <select class="form-control" style="max-width: 100px;" @bind="NewContact.CountryCode">
                                 <option value="+1">+1</option>
@@ -131,7 +131,7 @@
                     </div>
 
                     <div class="form-group required">
-                        <label>Send transfers by</label>
+                            <label>Send transfers by <small class="text-danger font-13">*</small></label>
                         <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
                             <label class="btn btn-outline-secondary flex-fill @(NewContact.TransferByEmail ? "active" : "")"
                                    @onclick="@(() => NewContact.TransferByEmail = !NewContact.TransferByEmail)">
@@ -149,7 +149,7 @@
                     </div>
 
                     <div class="form-group required">
-                        <label>Contact’s preferred language</label>
+                            <label>Contact’s preferred language <small class="text-danger font-13">*</small></label>
                         <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
                             <label class="btn btn-outline-secondary flex-fill @(NewContact.PreferredLanguage == "English" ? "active" : "")">
                                 <input type="radio" value="English" class="d-none" @onchange="@(() => NewContact.PreferredLanguage = "English")" /> English

@@ -1,198 +1,438 @@
 ﻿@page "/pay-bill"
 @layout MainLayout
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+@using System.Net.Http.Headers
+@using System.Text
+
+
+@if (IsLoading)
+{
+    <div class="spinner-overlay">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
 
 <div class="row">
-
     <SideNavSlider />
-
     <div class="col-lg-9">
         <div class="card">
             <div class="card-body">
                 <div class="tab-content" id="profile-tabContent">
-                    <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
+                    <div class="tab-pane fade show active">
                         <h3 class="text-primary"><u>Pay a Bill</u></h3>
-                        <!-- Modal (Keep the same modal, just update the body content) -->
-                        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Transfer Summary</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
 
-                                        <p id="summaryContent">Loading...</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary">Confirm Transfer</button>
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- /.modal -->
-                        <br />
+                        @if (ShowSuccessMessage)
+                        {
+                            <div class="row justify-content-center">
+                                <div class="col-md-9">
+                                    <div class="card border border-primary shadow-sm">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted">Your bill has been paid successfully. Below is a summary of the transaction.</p>
 
-                        <div class="row">
+                                            <dl class="row">
+                                                <dt class="col-sm-4">From Account:</dt>
+                                                <dd class="col-sm-8">@SelectedFromSummary</dd>
 
-                            <div class="col-md-12">
-                                <div class="row justify-content-center">
-                                    <div class="col-md-9">
-                                        <form id="my-acccount-form" class="mb-0">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label for="requestFrom">Pay from</label>
-                                                        <select class="form-control" id="requestFrom">
-                                                            <option>Select</option>
-                                                            <option>Chequing-100108226953 = $51,538.78</option>
-                                                            <option>Savings-100108226953 = $51,538.78</option>
-                                                        </select>
-                                                        <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn">+ Add payee</button>
+                                                <dt class="col-sm-4">To Payee:</dt>
+                                                <dd class="col-sm-8">@SelectedToSummary</dd>
+
+                                                <dt class="col-sm-4">Amount:</dt>
+                                                <dd class="col-sm-8">@($"{Convert.ToDecimal(Model.Amount):C2}")</dd>
+
+                                                <dt class="col-sm-4">Frequency:</dt>
+                                                <dd class="col-sm-8">@Model.Frequency</dd>
+
+                                                <dt class="col-sm-4">Payment Date:</dt>
+                                                <dd class="col-sm-8">@DateTime.UtcNow.ToString("MMMM dd, yyyy")</dd>
+
+                                                <dt class="col-sm-4">Transaction ID:</dt>
+                                                <dd class="col-sm-8">TXN-@Guid.NewGuid().ToString().Substring(0, 8).ToUpper()</dd>
+                                            </dl>
+
+                                            <div class="text-right mt-3">
+                                                <div class="row justify-content-end">
+                                                    <div class="col-md-3">
+                                                        <button class="btn btn-outline-primary w-100" @onclick="@(() => NavigationManager.NavigateTo(NavigationManager.Uri, true))">
+                                                            <i class="fas fa-check-circle"></i> Done
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label>Pay To <small class="text-danger font-13">*</small></label>
-                                                        <select class="form-control" name="transferTo">
-                                                            <option>Select</option>
-                                                            <option>Savings-100108226953 = $51,538.78</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Amount <small class="text-danger font-13">*</small></label>
-                                                        <input type="text" name="amount" class="form-control" placeholder="$0.00" id="amount">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Currency</label>
-                                                        <select class="form-control" name="currency">
-                                                            <option>CAD</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label class="col-form-label pt-0">Frequency<small class="text-danger font-13">*</small></label>
-                                                        <select class="form-control" name="frequency">
-                                                            <option value="Once" selected>Once</option>
-                                                            <option value="Weekly">Weekly</option>
-                                                            <option value="Monthly">Monthly</option>
-                                                            <option value="Yearly">Yearly</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label class="col-form-label pt-0">Start Date<small class="text-danger font-13">*</small></label>
-                                                        <input class="form-control" type="date" value="2011-08-19" id="example-date-input">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label class="col-form-label pt-0">End Date<small class="text-danger font-13">*</small></label>
-                                                        <input class="form-control" type="date" value="2011-08-19" id="example-date-input">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label class="col-form-label pt-0">Memo</label>
-                                                        <input class="form-control" type="text" id="memo">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row justify-content-end">
-                                                <div class="col-md-3">
-                                                    <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                        <button type="reset" class="btn btn-outline-primary waves-effect waves-light btn-pd-left-right w-100">Clear</button>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                        <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right w-100" data-toggle="modal" data-animation="bounce" data-target=".bs-example-modal-lg" id="openSummaryModal">Continue</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <br />
-
-                                        </form>
-                                    </div>
-                                    <div class="row single-pro-info-tab" style="border:none;">
-                                        <div class="col-md-12">
-                                            <div class="alert alert-outline-primary mb-0" role="alert">
-                                                <h4 class="alert-heading font-18"><i class="fas fa-info-circle"></i> When are my transactions processed?</h4>
-                                                <p>
-                                                    After you initiate an <em>Interac</em> e-Transfer, we will withdraw the chosen amount from the account selected and
-                                                    send an email or text message notification to the <em>Interac</em> e-Transfer recipient at the email address or mobile
-                                                    number that you provide. The email or text message notification will identify you as the sender and contain
-                                                    the <em>Interac</em> e-Transfer amount, the name of the <em>Interac</em> e-Transfer recipient, and that you are using
-                                                    <em>Interac</em> e-Transfer.
-                                                </p>
-
-                                                <p>
-                                                    An <em>Interac</em> e-Transfer recipient can claim or decline the <em>Interac</em> e-Transfer using Online and Mobile Banking,
-                                                    the online and mobile banking services of another financial institution.
-                                                </p>
-
-                                                <p>
-                                                    ACCE and other financial institutions participating in <em>Interac</em> e-Transfer, the owner of the <em>Interac</em> e-Transfer
-                                                    service, are entitled to pay an <em>Interac</em> e-Transfer to anyone who, in using Online or Mobile Banking, or the
-                                                    online or mobile banking service of another financial institution, claims the <em>Interac</em> e-Transfer and where
-                                                    applicable, correctly responds to the <em>Interac</em> e-Transfer question, whether you intended that person to receive
-                                                    the <em>Interac</em> e-Transfer or not.
-                                                </p>
-
-                                                <p>You are responsible for providing a correct and operational email address and/or mobile number for the transaction.</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        }
+                        else if (ShowConfirmation)
+                        {
+                            <div class="row justify-content-center">
+                                <div class="col-md-9">
+                                    <div class="card p-3 mb-4 shadow-sm border border-primary">
+                                        <h5 class="mb-3 text-primary"><i class="fas fa-receipt"></i> Confirmation</h5>
+                                        <dl class="row mb-0">
+                                            <dt class="col-sm-4">Pay From:</dt>
+                                            <dd class="col-sm-8">@SelectedFromSummary</dd>
+                                            <dt class="col-sm-4">Pay To:</dt>
+                                            <dd class="col-sm-8">@SelectedToSummary</dd>
 
+                                            <dt class="col-sm-4">Amount:</dt>
+                                            <dd class="col-sm-8 text-primary font-weight-bold">@($"{Convert.ToDecimal(Model.Amount):C2}")</dd>
 
-                            </div><!--end col-->
-                        </div><!--end row-->
-                    </div><!--end tab-pane-->
+                                            <dt class="col-sm-4">Frequency:</dt>
+                                            <dd class="col-sm-8">@Model.Frequency</dd>
 
-                    <div class="tab-pane fade" id="request-money">
-                        <h4 class="mt-0 header-title mb-3">Request Money</h4>
+                                            @if (Model.Frequency == "Once")
+                                            {
+                                                <dt class="col-sm-4">Date:</dt>
+                                                <dd class="col-sm-8">@Model.Date?.ToString("yyyy-MM-dd")</dd>
+                                            }
+                                            else
+                                            {
+                                                <dt class="col-sm-4">Start Date:</dt>
+                                                <dd class="col-sm-8">@Model.StartDate?.ToString("yyyy-MM-dd")</dd>
+                                                <dt class="col-sm-4">End Date:</dt>
+                                                <dd class="col-sm-8">@Model.EndDate?.ToString("yyyy-MM-dd")</dd>
+                                            }
 
-                    </div><!--end tab-pane-->
+                                            <dt class="col-sm-4">Memo:</dt>
+                                            <dd class="col-sm-8">@Model.Memo</dd>
+                                        </dl>
+                                        <div class="text-right mt-3">
+                                            <div class="row justify-content-end">
+                                                <div class="col-md-3">
+                                                    <button class="btn btn-outline-primary w-100" @onclick="BackToForm">Back</button>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Pay a Bill</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <EditForm Model="@Model" OnValidSubmit="HandleContinue">
+                                <DataAnnotationsValidator />
+                                <div class="row justify-content-center">
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Pay from <small class="text-danger font-13">*</small></label>
+                                                    <select class="form-control" @bind="Model.AccountId">
+                                                        <option value="">Select</option>
+                                                        @foreach (var account in Accounts)
+                                                        {
+                                                            <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                        }
+                                                    </select>
+                                                    <ValidationMessage For="@(() => Model.AccountId)" class="text-danger" />
+                                                </div>
+                                            </div>
+                                        </div>
 
-                    <div class="tab-pane fade" id="cancel-bill-payment">
-                        <h4 class="mt-0 header-title mb-3">Cancel Bill Payment</h4>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Pay To <small class="text-danger font-13">*</small></label>
+                                                    <select class="form-control" @bind="Model.PayeeId">
+                                                        <option value="">Select</option>
+                                                        @foreach (var payee in PayeeList)
+                                                        {
+                                                            <option value="@payee.PayeeId">@payee.PayeeName - @payee.PayeeTypeName - @payee.PayeeNumber</option>
+                                                        }
+                                                    </select>
+                                                    <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn">+ Add payee</button>
+                                                    <ValidationMessage For="@(() => Model.PayeeId)" class="text-danger" />
+                                                </div>
+                                            </div>
+                                        </div>
 
-                    </div><!--end tab-pen-->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Amount <small class="text-danger font-13">*</small></label>
+                                                    <InputText class="form-control" @bind-Value="Model.Amount" />
+                                                    <ValidationMessage For="@(() => Model.Amount)" class="text-danger" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Frequency <small class="text-danger font-13">*</small></label>
+                                                    <select class="form-control" @bind="Model.Frequency">
+                                                        <option value="Once">Once</option>
+                                                        <option value="Weekly">Weekly</option>
+                                                        <option value="Monthly">Monthly</option>
+                                                        <option value="Yearly">Yearly</option>
+                                                    </select>
+                                                    <ValidationMessage For="@(() => Model.Frequency)" class="text-danger" />
+                                                </div>
+                                            </div>
+                                        </div>
 
-                    <div class="tab-pane fade" id="pay-multiple-bills">
-                        <h4 class="mt-0 header-title mb-3">Pay Multiple Bills</h4>
-                        <div class="row">
-                            <div class="col-lg-12">
-                            </div> <!--end col-->
-                        </div><!--end row-->
-                    </div><!--end tab-pane-->
-                </div>  <!--end tab-content-->
-            </div><!--end card-body-->
-        </div><!--end card-->
-    </div><!--end col-->
-</div><!--end row-->
+                                        <div class="row">
+                                           
+                                            
+                                            @if (Model.Frequency == "Once")
+                                            {
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Date</label>
+                                                        <InputDate class="form-control" @bind-Value="Model.Date" />
+                                                        <ValidationMessage For="@(() => Model.Date)" class="text-danger" />
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Start Date</label>
+                                                        <InputDate class="form-control" @bind-Value="Model.StartDate" />
+                                                        <ValidationMessage For="@(() => Model.StartDate)" class="text-danger" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>End Date</label>
+                                                        <InputDate class="form-control" @bind-Value="Model.EndDate" />
+                                                        <ValidationMessage For="@(() => Model.EndDate)" class="text-danger" />
+                                                     </div>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Memo</label>
+                                                    <InputText class="form-control" @bind-Value="Model.Memo" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row justify-content-end">
+                                            <div class="col-md-3">
+                                                <button type="reset" class="btn btn-outline-primary w-100">Clear</button>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <button type="submit" class="btn btn-primary w-100">Continue</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        }
+
+                        <br />
+                        <div class="row justify-content-center">
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-outline-primary mb-0" role="alert">
+                                            <h4 class="alert-heading font-18"><i class="fas fa-comments"></i> When are my transactions processed?</h4>
+                                            <p>Transactions you make on business days before 6:00 pm will be processed by us the same day.</p>
+                                            <p>Transactions made at all other times will be processed by us the next business day.</p>
+                                            <p>Payments to third parties (such as utility bills and non-RBC credit cards) often need more processing time by the third party -- which generally takes up to 3 days.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @code {
+    private List<AccountModel> Accounts = new();
+    private List<PayeeItem> PayeeList = new();
+    private BillPaymentModel Model = new();
+    private bool ShowConfirmation = false;
+    private string SelectedFromSummary = "";
+    private string SelectedToSummary = "";
+    private string AuthToken = "";
+    private string ContactId = "";
+    private bool IsLoading = false;
+    private bool ShowSuccessMessage = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        AuthToken = await LocalStorage.GetItemAsync<string>("auth_token") ?? "";
+        ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? "";
+        await FetchAccounts();
+        await LoadPayees();
+    }
+
+    private async Task FetchAccounts()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/accounts/cust-account?ContactId={ContactId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<AccountModel>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (result?.Status == "Success")
+                    Accounts = result.Data;
+            }
+        }
+        finally { IsLoading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadPayees()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/getpayeelist");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<PayeeItem>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (result?.Data != null)
+                    PayeeList = result.Data;
+            }
+        }
+        finally { IsLoading = false;  StateHasChanged(); }
+    }
+
+    private void BackToForm() => ShowConfirmation = false;
+
+    private void HandleContinue()
+    {
+        var from = Accounts.FirstOrDefault(a => a.AccountId == Model.AccountId);
+        var to = PayeeList.FirstOrDefault(p => p.PayeeId == Model.PayeeId);
+        SelectedFromSummary = from != null ? $"{from.AccountName} - {from.AccountNumber}" : "";
+        SelectedToSummary = to != null ? $"{to.PayeeName} - {to.PayeeTypeName} - {to.PayeeNumber}" : "";
+        ShowConfirmation = true;
+    }
+
+    public class BillPaymentModel : IValidatableObject
+    {
+        [Required(ErrorMessage = "Pay From is required.")]
+        public string AccountId { get; set; }
+
+        [Required(ErrorMessage = "Pay To is required.")]
+        public string PayeeId { get; set; }
+
+        [Required(ErrorMessage = "Amount is required.")]
+        [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "Enter a valid amount.")]
+        public string Amount { get; set; }
+
+        [Required]
+        public string Frequency { get; set; } = "Once";
+
+        public string Memo { get; set; }
+
+        public DateTime? Date { get; set; }
+
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (Frequency != "Once")
+            {
+                if (StartDate == null)
+                    yield return new ValidationResult("Start Date is required.", new[] { nameof(StartDate) });
+
+                if (EndDate == null)
+                    yield return new ValidationResult("End Date is required.", new[] { nameof(EndDate) });
+
+                if (StartDate != null && EndDate != null && StartDate > EndDate)
+                    yield return new ValidationResult("Start Date cannot be after End Date.", new[] { nameof(StartDate), nameof(EndDate) });
+            }
+            else
+            {
+                if (Date == null)
+                    yield return new ValidationResult("Date is required.", new[] { nameof(Date) });
+            }
+        }
+    }
+
+
+    private async Task SubmitPayBill()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+            var payload = new
+            {
+                AccountNumberFrom = Model.AccountId,
+                ToAccountNumbers = new[]
+                {
+                new
+                {
+                    AccountNumberTo = Model.PayeeId,
+                    Amount = decimal.TryParse(Model.Amount, out var amt) ? amt : 0,
+                    Currency = "CAD",
+                    Frequency = Model.Frequency,
+                    StartDate = Model.Frequency == "Once" ? today : Model.StartDate?.ToString("yyyy-MM-dd"),
+                    EndDate = Model.Frequency == "Once" ? today : Model.EndDate?.ToString("yyyy-MM-dd"),
+                    Memo = string.IsNullOrWhiteSpace(Model.Memo) ? null : Model.Memo
+                }
+            }
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post,
+                "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/accounts/PayBill");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            request.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var response = await Http.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowSuccessMessage = true;
+                ShowConfirmation = false;
+                StateHasChanged();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", $"❌ Error: {response.StatusCode}\n{content}");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"❗ Exception: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    public class PayeeItem { public string PayeeId { get; set; } public string PayeeName { get; set; } public string PayeeNumber { get; set; } public string PayeeType { get; set; } public string PayeeTypeName { get; set; } }
+    public class ApiResponse<T> { public string Status { get; set; } public T Data { get; set; } public string Message { get; set; } public int StatusCode { get; set; } }
+    public class AccountModel { public string AccountId { get; set; } public string AccountName { get; set; } public string AccountNumber { get; set; } public decimal Balance { get; set; } }
 }

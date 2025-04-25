@@ -50,7 +50,7 @@
                                         {
                                             <tr>
                                                 <td>@item.PayeeName</td>
-                                                <td>@item.PayeeType</td>
+                                                <td>@item.PayeeTypeName</td>
                                                 <td>@item.PayeeNumber</td>
                                             </tr>
                                         }
@@ -81,7 +81,7 @@
             </div>
             <div class="modal-body">
                 <div class="col-sm-12 mb-3">
-                    <label>Payee Name</label>
+                    <label>Payee Name <small class="text-danger font-13">*</small></label>
                     <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
                     @if (ShowPayeeNameError)
                     {
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="col-sm-12 mb-3">
-                    <label>Payee Type</label>
+                    <label>Payee Type <small class="text-danger font-13">*</small></label>
                     <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
                         <option value="">-- Select --</option>
                         @foreach (var category in payeeCategories)
@@ -105,7 +105,7 @@
                 </div>
 
                 <div class="col-sm-12 mb-3">
-                    <label>Account Number</label>
+                    <label>Account Number <small class="text-danger font-13">*</small></label>
                     <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
                     @if (ShowPayeeNumberError)
                     {
@@ -225,6 +225,7 @@
         public string PayeeName { get; set; }
         public string PayeeType { get; set; }
         public string PayeeNumber { get; set; }
+        public string PayeeTypeName { get; set; }
     }
 
     public class BaseResponseModel<T>

@@ -1,9 +1,14 @@
 ﻿@page "/transfer-funds"
 @layout MainLayout
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+@using System.Text.Json
+@using System.Net.Http.Headers
 
 <div class="row">
-
     <SideNavSlider />
 
     <div class="col-lg-9">
@@ -12,7 +17,8 @@
                 <div class="tab-content" id="profile-tabContent">
                     <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
                         <h3 class="text-primary"><u>Transfer Money</u></h3>
-                        <!-- Modal (Keep the same modal, just update the body content) -->
+
+                        <!-- Modal -->
                         <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
@@ -23,7 +29,6 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-
                                         <p id="summaryContent">Loading...</p>
                                     </div>
                                     <div class="modal-footer">
@@ -33,335 +38,301 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- /.modal -->
+
                         <br />
                         <div class="single-pro-info-tab">
                             <ul class="nav nav-pills mb-0 nav-justified" id="pills-tab" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="pay-with-acce-accounts-tab" data-toggle="pill" href="#pay-with-acce-accounts" aria-selected="true">My Accounts</a>
+                                    <a class="nav-link active" data-toggle="pill" href="#pay-with-acce-accounts">My Accounts</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="pay-with-acce-rewards-points-tab" data-toggle="pill" href="#pay-with-acce-rewards-points" aria-selected="false">Another Member</a>
+                                    <a class="nav-link" data-toggle="pill" href="#pay-with-acce-rewards-points">Another Member</a>
                                 </li>
                             </ul>
                         </div>
-                        <div>
-                            <div class="tab-content mt-4" id="pills-tabContent">
-                                <div class="tab-pane fade show active" id="pay-with-acce-accounts">
-                                    <div class="row">
 
-                                        <div class="col-md-12">
-                                            <div class="row justify-content-center">
-                                                <div class="col-md-9">
-                                                    <form id="my-acccount-form" class="mb-0">
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label>Transfer From <small class="text-danger font-13">*</small></label>
-                                                                    <select class="form-control" name="transferFrom">
-                                                                        <option>Select</option>
-                                                                        <option>Chequing-100108226953 = $51,538.78</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label>Transfer To <small class="text-danger font-13">*</small></label>
-                                                                    <select class="form-control" name="transferTo">
-                                                                        <option>Select</option>
-                                                                        <option>Savings-100108226953 = $51,538.78</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
+                        <div class="tab-content mt-4" id="pills-tabContent">
+                            <!-- My Accounts Tab -->
+                            <div class="tab-pane fade show active" id="pay-with-acce-accounts">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row justify-content-center">
+                                            <div class="col-md-9">
+                                                <form class="mb-0">
+                                                    <div class="form-group">
+                                                        <label>Transfer From <small class="text-danger font-13">*</small></label>
+                                                        <select class="form-control" @bind="SelectedTransferFrom">
+                                                            <option value="">Select</option>
+                                                            @foreach (var account in Accounts)
+                                                            {
+                                                                <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Transfer To <small class="text-danger font-13">*</small></label>
+                                                        <select class="form-control">
+                                                            <option value="">Select</option>
+                                                            @foreach (var account in Accounts)
+                                                            {
+                                                                <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-4">
+                                                            <label>Amount <small class="text-danger font-13">*</small></label>
+                                                            <input type="text" class="form-control" placeholder="$0.00">
                                                         </div>
-
-                                                        <div class="row">
-                                                            <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label>Amount <small class="text-danger font-13">*</small></label>
-                                                                    <input type="text" name="amount" class="form-control" placeholder="$0.00" id="amount">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label>Currency</label>
-                                                                    <select class="form-control" name="currency">
-                                                                        <option>CAD</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label class="col-form-label pt-0">Frequency<small class="text-danger font-13">*</small></label>
-                                                                    <select class="form-control" name="frequency">
-                                                                        <option value="Once" selected>Once</option>
-                                                                        <option value="Weekly">Weekly</option>
-                                                                        <option value="Monthly">Monthly</option>
-                                                                        <option value="Yearly">Yearly</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Currency</label>
+                                                            <select class="form-control">
+                                                                <option>CAD</option>
+                                                            </select>
                                                         </div>
-
-                                                        <div class="row">
-                                                        </div>
-
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label class="col-form-label pt-0">Start Date<small class="text-danger font-13">*</small></label>
-                                                                    <input class="form-control" type="date" value="2011-08-19" id="example-date-input">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label class="col-form-label pt-0">End Date<small class="text-danger font-13">*</small></label>
-                                                                    <input class="form-control" type="date" value="2011-08-19" id="example-date-input">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label class="col-form-label pt-0">Memo</label>
-                                                                    <input class="form-control" type="text" id="memo">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row justify-content-end">
-                                                            <div class="col-md-3">
-                                                                <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                                    <button type="reset" class="btn btn-outline-primary waves-effect waves-light btn-pd-left-right w-100">Clear</button>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                                    <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right w-100" data-toggle="modal" data-animation="bounce" data-target=".bs-example-modal-lg" id="openSummaryModal">Continue</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <br />
-
-                                                    </form>
-                                                </div>
-                                                <div class="row single-pro-info-tab" style="border:none;">
-                                                    <div class="col-md-12">
-                                                        <div class="alert alert-outline-primary mb-0" role="alert">
-                                                            <h4 class="alert-heading font-18"><i class="fas fa-info-circle"></i> When are my transactions processed?</h4>
-                                                            <p>Transactions you make on business days before <strong>6 p.m.</strong> will be processed by us the same day.</p>
-                                                            <p>Transactions made at all other times will be processed by us the next business day.</p>
-                                                            <p>Payments to third parties (such as utility bills and non-RBC credit cards) often need more processing time by the third party — which generally takes up to <strong>3 business days</strong>. It's a good idea to check with these third parties to find out how far in advance you should make the payments in order to meet their due date.</p>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Frequency <small class="text-danger font-13">*</small></label>
+                                                            <select class="form-control" @bind="SelectedFrequencyTab1">
+                                                                <option value="Once">Once</option>
+                                                                <option value="Weekly">Weekly</option>
+                                                                <option value="Monthly">Monthly</option>
+                                                                <option value="Yearly">Yearly</option>
+                                                            </select>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                    <div class="form-row">
+                                                        @if (SelectedFrequencyTab1 == "Once")
+                                                        {
+                                                            <div class="form-group col-md-6">
+                                                                <label>Date <small class="text-danger font-13">*</small></label>
+                                                                <input class="form-control" type="date">
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="form-group col-md-6">
+                                                                <label>Start Date <small class="text-danger font-13">*</small></label>
+                                                                <input class="form-control" type="date">
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>End Date <small class="text-danger font-13">*</small></label>
+                                                                <input class="form-control" type="date">
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Memo</label>
+                                                        <input type="text" class="form-control">
+                                                    </div>
+                                                    <div class="form-row justify-content-end">
+                                                        <div class="col-md-3">
+                                                            <button type="reset" class="btn btn-outline-primary w-100">Clear</button>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <button type="button" class="btn btn-primary w-100" data-toggle="modal" data-target=".bs-example-modal-lg">Continue</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
                                             </div>
-
-
-                                        </div><!--end col-->
-                                    </div><!--end row-->
-                                </div>
-                                <div class="tab-pane fade mt-4" id="pay-with-acce-rewards-points">
-                                    <div>
-                                        <div class="row">
-
-                                            <div class="col-md-12">
-                                                <div class="row justify-content-center">
-                                                    <div class="col-md-9">
-                                                        <form id="my-acccount-form" class="mb-0">
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-group">
-                                                                        <label>Transfer From <small class="text-danger font-13">*</small></label>
-                                                                        <select class="form-control" name="transferFrom">
-                                                                            <option>Select</option>
-                                                                            <option>Chequing-100108226953 = $51,538.78</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-12">
-                                                                    <div class="form-group">
-                                                                        <label>Transfer To <small class="text-danger font-13">*</small></label>
-                                                                        <select class="form-control" name="transferTo">
-                                                                            <option>Select</option>
-                                                                            <option>Savings-100108226953 = $51,538.78</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="row">
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label>Amount <small class="text-danger font-13">*</small></label>
-                                                                        <input type="text" name="amount" class="form-control" placeholder="$0.00" id="amount">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label>Currency</label>
-                                                                        <select class="form-control" name="currency">
-                                                                            <option>CAD</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label class="col-form-label pt-0">Frequency<small class="text-danger font-13">*</small></label>
-                                                                        <select class="form-control" name="frequency">
-                                                                            <option value="Once" selected>Once</option>
-                                                                            <option value="Weekly">Weekly</option>
-                                                                            <option value="Monthly">Monthly</option>
-                                                                            <option value="Yearly">Yearly</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="row">
-                                                            </div>
-
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label class="col-form-label pt-0">Start Date<small class="text-danger font-13">*</small></label>
-                                                                        <input class="form-control" type="date" value="2011-08-19" id="example-date-input">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label class="col-form-label pt-0">End Date<small class="text-danger font-13">*</small></label>
-                                                                        <input class="form-control" type="date" value="2011-08-19" id="example-date-input">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-group">
-                                                                        <label class="col-form-label pt-0">Memo</label>
-                                                                        <input class="form-control" type="text" id="memo">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row justify-content-end">
-                                                                <div class="col-md-3">
-                                                                    <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                                        <button type="reset" class="btn btn-outline-primary waves-effect waves-light btn-pd-left-right w-100">Clear</button>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                                        <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right w-100" data-toggle="modal" data-animation="bounce" data-target=".bs-example-modal-lg" id="openSummaryModal">Continue</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <br />
-
-                                                        </form>
-                                                    </div>
-                                                    <div class="row single-pro-info-tab" style="border:none;">
-                                                        <div class="col-md-12">
-                                                            <div class="alert alert-outline-primary mb-0" role="alert">
-                                                                <h4 class="alert-heading font-18"><i class="fas fa-info-circle"></i> When are my transactions processed?</h4>
-                                                                <p>Transactions you make on business days before <strong>6 p.m.</strong> will be processed by us the same day.</p>
-                                                                <p>Transactions made at all other times will be processed by us the next business day.</p>
-                                                                <p>Payments to third parties (such as utility bills and non-RBC credit cards) often need more processing time by the third party — which generally takes up to <strong>3 business days</strong>. It's a good idea to check with these third parties to find out how far in advance you should make the payments in order to meet their due date.</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-
-                                            </div><!--end col-->
-                                        </div><!--end row-->
-
-
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade mt-4" id="pills-about-brand">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <img src="assets/images/products/2.jpg" alt="" height="150" class="d-block mx-auto">
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <span class="bg-soft-danger rounded-pill px-3 py-2 font-weight-bold">Frogetor</span>
-                                            <h5 class="mt-3">It is a long established fact that a reader will be distracted</h5>
-                                            <p class="text-muted mb-0">
-                                                There are many variations of passages of Lorem Ipsum available,
-                                                but the majority have suffered alteration in some form, by injected humour,
-                                                or randomised words which don't look even slightly believable.
-                                                If you are going to use a passage.
-                                            </p>
-                                        </div><!--end col-->
-                                        <div class="col-lg-4">
-                                            <ul class="list-unstyled">
-                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>It is a long established fact that a reader will be distracted.</li>
-                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>Contrary to popular belief, Lorem Ipsum is not text.</li>
-                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>There are many variations of passages of Lorem.</li>
-                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>It is a long established fact that a reade.</li>
-                                            </ul>
-                                        </div><!--end col-->
-                                    </div><!--end row-->
-                                </div>
-                                <div class="tab-pane fade mt-4" id="pills-custom">
-                                    <div class="row">
-                                        <div class="col-lg-4">
-                                            <div class="pro-order-box mb-2 mb-lg-0">
-                                                <i class="mdi mdi-white-balance-sunny text-warning"></i>
-                                                <h4 class="header-title">Seff from Sunlight</h4>
-                                                <p class="text-muted">
-                                                    Contrary to popular belief, Lorem Ipsum is.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <div class="pro-order-box mb-2 mb-lg-0">
-                                                <i class="mdi mdi-fire text-danger"></i>
-                                                <h4 class="header-title">Not Seff from Fire </h4>
-                                                <p class="text-muted">
-                                                    It is a long established fact that.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <div class="pro-order-box mb-2 mb-lg-0">
-                                                <i class="mdi mdi-glass-wine text-success"></i>
-                                                <h4 class="header-title">Seff from liqvid</h4>
-                                                <p class="text-muted">
-                                                    There are many variations of passages.
-                                                </p>
+                            </div>
+
+                            <!-- Another Member Tab -->
+                            <div class="tab-pane fade" id="pay-with-acce-rewards-points">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row justify-content-center">
+                                            <div class="col-md-9">
+                                                <form class="mb-0">
+                                                    <div class="form-group">
+                                                        <label>Transfer From <small class="text-danger font-13">*</small></label>
+                                                        <select class="form-control">
+                                                            <option>Select</option>
+                                                            @foreach (var account in Accounts)
+                                                            {
+                                                                <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Transfer To <small class="text-danger font-13">*</small></label>
+                                                        <select class="form-control">
+                                                            <option>Select</option>
+                                                            @foreach (var contact in Contacts)
+                                                            {
+                                                                <option value="@contact.AccountNumber">@($"{contact.Name ?? contact.NickName} - {contact.AccountNumber}")</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-4">
+                                                            <label>Amount <small class="text-danger font-13">*</small></label>
+                                                            <input type="text" class="form-control" placeholder="$0.00">
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Currency</label>
+                                                            <select class="form-control">
+                                                                <option>CAD</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Frequency <small class="text-danger font-13">*</small></label>
+                                                            <select class="form-control" @bind="SelectedFrequencyTab2">
+                                                                <option value="Once">Once</option>
+                                                                <option value="Weekly">Weekly</option>
+                                                                <option value="Monthly">Monthly</option>
+                                                                <option value="Yearly">Yearly</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        @if (SelectedFrequencyTab2 == "Once")
+                                                        {
+                                                            <div class="form-group col-md-6">
+                                                                <label>Date <small class="text-danger font-13">*</small></label>
+                                                                <input class="form-control" type="date">
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="form-group col-md-6">
+                                                                <label>Start Date <small class="text-danger font-13">*</small></label>
+                                                                <input class="form-control" type="date">
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>End Date <small class="text-danger font-13">*</small></label>
+                                                                <input class="form-control" type="date">
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Memo</label>
+                                                        <input type="text" class="form-control">
+                                                    </div>
+                                                    <div class="form-row justify-content-end">
+                                                        <div class="col-md-3">
+                                                            <button type="reset" class="btn btn-outline-primary w-100">Clear</button>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <button type="button" class="btn btn-primary w-100" data-toggle="modal" data-target=".bs-example-modal-lg">Continue</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div><!--end tab-pane-->
-
-                    <div class="tab-pane fade" id="request-money">
-                        <h4 class="mt-0 header-title mb-3">Request Money</h4>
-
-                    </div><!--end tab-pane-->
-
-                    <div class="tab-pane fade" id="cancel-bill-payment">
-                        <h4 class="mt-0 header-title mb-3">Cancel Bill Payment</h4>
-
-                    </div><!--end tab-pen-->
-
-                    <div class="tab-pane fade" id="pay-multiple-bills">
-                        <h4 class="mt-0 header-title mb-3">Pay Multiple Bills</h4>
-                        <div class="row">
-                            <div class="col-lg-12">
-                            </div> <!--end col-->
-                        </div><!--end row-->
-                    </div><!--end tab-pane-->
-                </div>  <!--end tab-content-->
-            </div><!--end card-body-->
-        </div><!--end card-->
-    </div><!--end col-->
-</div><!--end row-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
+    private List<AccountModel> Accounts = new();
+    private List<ContactModel> Contacts = new();
+    private string SelectedTransferFrom = "";
+    private string ContactId = "";
+    private string AuthToken = "";
+    private bool IsLoading = false;
 
+    private string SelectedFrequencyTab1 = "Once";
+    private string SelectedFrequencyTab2 = "Once";
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthToken = await LocalStorage.GetItemAsync<string>("auth_token") ?? string.Empty;
+        ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? string.Empty;
+        await FetchAccounts();
+        await LoadContacts();
+    }
+
+    private async Task FetchAccounts()
+    {
+        IsLoading = true;
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/accounts/cust-account?ContactId={ContactId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<AccountModel>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (result?.Status == "Success")
+                    Accounts = result.Data;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching accounts: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadContacts()
+    {
+        IsLoading = true;
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/get-list");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<ContactModel>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (result != null && result.Status == "Success" && result.Data != null)
+                {
+                    Contacts = result.Data;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error loading contacts: " + ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public class ContactModel
+    {
+        public string Name { get; set; }
+        public string NickName { get; set; }
+        public string Email { get; set; }
+        public string MobileNumber { get; set; }
+        public string AccountNumber { get; set; }
+        public string AccountId { get; set; }
+        public string PreferredLanguage { get; set; }
+    }
+
+    public class ApiResponse<T>
+    {
+        public string Status { get; set; }
+        public T Data { get; set; }
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+    }
+
+    public class AccountModel
+    {
+        public string AccountId { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNumber { get; set; }
+        public decimal Balance { get; set; }
+    }
 }

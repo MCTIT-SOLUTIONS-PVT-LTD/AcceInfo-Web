@@ -68,7 +68,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Account Type</label>
+                            <label>Account Type <small class="text-danger font-13">*</small></label>
                         <select class="form-control" @bind="NewAccount.AccountCategoryId">
                             <option value="">-- Select Account Type --</option>
                             @foreach (var type in AccountTypes)
@@ -82,7 +82,7 @@
                         }
                     </div>
                     <div class="form-group">
-                        <label>Account Name</label>
+                            <label>Account Name <small class="text-danger font-13">*</small></label>
                         <input type="text" class="form-control" @bind="NewAccount.AccountName" />
                         @if (ShowAccountNameError)
                         {
@@ -90,7 +90,7 @@
                         }
                     </div>
                     <div class="form-group">
-                        <label>Amount</label>
+                        <label>Amount <small class="text-danger font-13">*</small></label>
                         <input type="text" class="form-control" @bind="NewAccount.Amount" />
                         @if (ShowAmountError)
                         {
