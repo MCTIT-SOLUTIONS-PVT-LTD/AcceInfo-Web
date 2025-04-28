@@ -115,7 +115,7 @@
                                                 <div class="col-md-3">
                                                     <button class="btn btn-outline-primary w-100" @onclick="BackToForm">Back</button>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                     <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Pay a Bill</button>
                                                 </div>
                                             </div>
@@ -157,7 +157,7 @@
                                                             <option value="@payee.PayeeId">@payee.PayeeName - @payee.PayeeTypeName - @payee.PayeeNumber</option>
                                                         }
                                                     </select>
-                                                    <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowModal">+ Add payee</button>
+                                                        <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowAddModal">+ Add payee</button>
                                                     <ValidationMessage For="@(() => Model.PayeeId)" class="text-danger" />
                                                 </div>
                                             </div>
@@ -262,54 +262,58 @@
 </div>
 
 <!-- MODAL -->
-<div class="modal fade" id="editor-modal" tabindex="-1" role="dialog" aria-labelledby="editor-title">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content form-horizontal">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editor-title">Add Payee</h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <div class="col-sm-12 mb-3">
-                    <label>Payee Name <small class="text-danger font-13">*</small></label>
-                    <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
-                    @if (ShowPayeeNameError)
-                    {
-                        <div class="text-danger">Payee Name is required.</div>
-                    }
-                </div>
-
-                <div class="col-sm-12 mb-3">
-                    <label>Payee Type <small class="text-danger font-13">*</small></label>
-                    <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
-                        <option value="">-- Select --</option>
-                        @foreach (var category in payeeCategories)
+@if (ShowModal)
+{
+        <div class="modal show d-block" tabindex="-1" role="dialog" style="overflow-y: auto;">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content form-horizontal">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editor-title">Add Payee</h5>
+                        <button type="button" class="close" @onclick="CloseModal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-sm-12 mb-3">
+                            <label>Payee Name <small class="text-danger font-13">*</small></label>
+                            <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                        @if (ShowPayeeNameError)
                         {
-                            <option value="@category.PayeeTypeId">@category.Name</option>
+                                    <div class="text-danger">Payee Name is required.</div>
                         }
-                    </select>
-                    @if (ShowPayeeTypeError)
-                    {
-                        <div class="text-danger">Payee Type is required.</div>
-                    }
-                </div>
+                        </div>
 
-                <div class="col-sm-12 mb-3">
-                    <label>Account Number <small class="text-danger font-13">*</small></label>
-                    <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
-                    @if (ShowPayeeNumberError)
-                    {
-                        <div class="text-danger">Account Number is required.</div>
-                    }
+                        <div class="col-sm-12 mb-3">
+                            <label>Payee Type <small class="text-danger font-13">*</small></label>
+                            <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
+                                <option value="">-- Select --</option>
+                            @foreach (var category in payeeCategories)
+                            {
+                                        <option value="@category.PayeeTypeId">@category.Name</option>
+                            }
+                            </select>
+                        @if (ShowPayeeTypeError)
+                        {
+                                    <div class="text-danger">Payee Type is required.</div>
+                        }
+                        </div>
+
+                        <div class="col-sm-12 mb-3">
+                            <label>Account Number <small class="text-danger font-13">*</small></label>
+                            <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                        @if (ShowPayeeNumberError)
+                        {
+                                    <div class="text-danger">Account Number is required.</div>
+                        }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" @onclick="HandlePayeeSubmit">Save</button>
+                        <button type="button" class="btn btn-danger" @onclick="CloseModal">Cancel</button>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" @onclick="HandlePayeeSubmit">Save</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
             </div>
         </div>
-    </div>
-</div>
+}
+
 
 <!-- Toast -->
 <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;">
@@ -360,12 +364,12 @@
     $('#customToast').toast('show');
     };
 
-    function hideModal(modalId) {
-    $('#' + modalId).modal('hide');
-    }
-    function showModal(modalId) {
-    $('#' + modalId).modal('show');
-    }
+    // function hideModal(modalId) {
+    // $('#' + modalId).modal('hide');
+    // }
+    // function showModal(modalId) {
+    // $('#' + modalId).modal('show');
+    // }
 </script>
 
 @code {
@@ -379,6 +383,7 @@
     private string ContactId = "";
     private bool IsLoading = false;
     private bool ShowSuccessMessage = false;
+    private bool ShowModal = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -504,6 +509,7 @@
                     AccountNumberTo = Model.PayeeId,
                     Amount = decimal.TryParse(Model.Amount, out var amt) ? amt : 0,
                     Currency = "CAD",
+                    TransactionType = "Bill Payment",
                     Frequency = Model.Frequency,
                     StartDate = Model.Frequency == "Once" ? today : Model.StartDate?.ToString("yyyy-MM-dd"),
                     EndDate = Model.Frequency == "Once" ? today : Model.EndDate?.ToString("yyyy-MM-dd"),
@@ -520,7 +526,12 @@
             var response = await Http.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
 
-            if (response.IsSuccessStatusCode)
+            var result = JsonSerializer.Deserialize<ApiResponse<object>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            if (response.IsSuccessStatusCode && result != null && result.Status == "Success")
             {
                 ShowSuccessMessage = true;
                 ShowConfirmation = false;
@@ -528,8 +539,10 @@
             }
             else
             {
-                await JS.InvokeVoidAsync("alert", $"❌ Error: {response.StatusCode}\n{content}");
+                // await JS.InvokeVoidAsync("alert", $"❌ Error: {response.StatusCode}\n{content}");
+                await JS.InvokeVoidAsync("alert", $"Pay Bill failed: {result?.Message ?? "Unknown error"}");
             }
+
         }
         catch (Exception ex)
         {
@@ -645,8 +658,7 @@
     private async Task HandlePayeeSubmit()
     {
 
-        IsLoading = true;
-        StateHasChanged();
+        
 
         ShowPayeeNameError = string.IsNullOrWhiteSpace(newPayee.PayeeName);
         ShowPayeeTypeError = string.IsNullOrWhiteSpace(newPayee.PayeeType);
@@ -654,6 +666,9 @@
 
         if (ShowPayeeNameError || ShowPayeeTypeError || ShowPayeeNumberError)
             return;
+
+        IsLoading = true;
+        StateHasChanged();
 
         try
         {
@@ -679,6 +694,7 @@
                 newPayee = new PayeeAddRequest();
                 await LoadPayees();
                 await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
+                CloseModal();
             }
             else
             {
@@ -699,10 +715,12 @@
         }
     }
 
-    private async Task ShowModal()
+    private void CloseModal()
     {
-        await JSRuntime.InvokeVoidAsync("showModal", "editor-modal");
+        ShowModal = false;
     }
+
+    private void ShowAddModal() => ShowModal = true;
 
 
 }

@@ -45,9 +45,9 @@
                             <div class="card p-3 mb-4 shadow-sm border border-primary">
                                 <h5 class="mb-3 text-primary"><i class="fas fa-receipt"></i> Confirmation</h5>
                                 <dl class="row mb-0">
-                                    <dt class="col-sm-4">Pay From:</dt>
+                                    <dt class="col-sm-4">Transfer From:</dt>
                                     <dd class="col-sm-8">@SelectedFromSummary</dd>
-                                    <dt class="col-sm-4">Pay To:</dt>
+                                    <dt class="col-sm-4">Transfer To:</dt>
                                     <dd class="col-sm-8">@SelectedToSummary</dd>
 
                                     <dt class="col-sm-4">Amount:</dt>
@@ -77,8 +77,8 @@
                                         <div class="col-md-3">
                                             <button class="btn btn-outline-primary w-100" @onclick="BackToForm">Back</button>
                                         </div>
-                                        <div class="col-md-3">
-                                            <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Pay a Bill</button>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Transfer</button>
                                         </div>
                                     </div>
                                 </div>
@@ -129,7 +129,7 @@
                                                             </select>
                                                             @if (ShowValidation && string.IsNullOrWhiteSpace(SelectedTransferFrom))
                                                             {
-                                                                <div class="text-danger">Transfer From is required.</div>
+                                                                        <div class="text-danger">Please select the account to transfer from.</div>
                                                             }
                                                         </div>
                                                         <div class="form-group">
@@ -143,7 +143,7 @@
                                                             </select>
                                                             @if (ShowValidation && string.IsNullOrWhiteSpace(SelectedTransferTo))
                                                             {
-                                                                <div class="text-danger">Transfer From is required.</div>
+                                                                        <div class="text-danger">Please select the account to transfer to.</div>
                                                             }
                                                         </div>
                                                         <div class="form-row">
@@ -152,7 +152,7 @@
                                                                 <input type="text" class="form-control" @bind="AmountTab1" placeholder="$0.00" />
                                                                 @if (ShowValidation && string.IsNullOrWhiteSpace(AmountTab1))
                                                                 {
-                                                                    <div class="text-danger">Amount is required.</div>
+                                                                            <div class="text-danger">Please enter a valid transfer amount greater than $0.</div>
                                                                 }
                                                             </div>
                                                             <div class="form-group col-md-4">
@@ -240,7 +240,7 @@
                                                             <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowAddModal">+ Add Contact</button>
                                                             @if (ShowValidationAM && string.IsNullOrWhiteSpace(SelectedTransferFromTab2))
                                                             {
-                                                                <div class="text-danger">Transfer From is required.</div>
+                                                                        <div class="text-danger">Please select the account to transfer from.</div>
                                                             }
                                                         </div>
                                                         <div class="form-group">
@@ -249,12 +249,12 @@
                                                                 <option>Select</option>
                                                                 @foreach (var contact in Contacts)
                                                                 {
-                                                                    <option value="@contact.AccountNumber">@($"{contact.Name ?? contact.NickName} - {contact.AccountNumber}")</option>
+                                                                    <option value="@contact.AccountId">@($"{contact.Name ?? contact.NickName} - {contact.AccountNumber}")</option>
                                                                 }
                                                             </select>
                                                             @if (ShowValidationAM && string.IsNullOrWhiteSpace(SelectedTransferToTab2))
                                                             {
-                                                                <div class="text-danger">Transfer To is required.</div>
+                                                                <div class="text-danger">Please select the account to transfer to.</div>
                                                             }
                                                         </div>
                                                         <div class="form-row">
@@ -263,7 +263,7 @@
                                                                 <input type="text" class="form-control" placeholder="$0.00" @bind="AmountTab2">
                                                                 @if (ShowValidationAM && string.IsNullOrWhiteSpace(AmountTab2))
                                                                 {
-                                                                    <div class="text-danger">Amount is required.</div>
+                                                                    <div class="text-danger">Please enter a valid transfer amount greater than $0.</div>
                                                                 }
                                                             </div>
                                                             <div class="form-group col-md-4">
@@ -339,7 +339,7 @@
 
     @if (ShowModal)
     {
-        <div class="modal show d-block" tabindex="-1" role="dialog">
+            <div class="modal show d-block" tabindex="-1" role="dialog" style="overflow-y: auto;">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -353,7 +353,7 @@
                                    @bind="NewContact.Name" />
                             @if (SubmitAttempted && string.IsNullOrWhiteSpace(NewContact.Name))
                             {
-                                <div class="invalid-feedback">Name is required.</div>
+                                <div class="text-danger mt-1">Please enter the contact's name.</div>
                             }
                         </div>
 
@@ -375,7 +375,7 @@
                             </div>
                             @if (SubmitAttempted && string.IsNullOrWhiteSpace(NewContact.PhoneNumber))
                             {
-                                <div class="text-danger mt-1">Phone number is required.</div>
+                                <div class="text-danger mt-1">Please enter a valid phone number. (10 digit validation)</div>
                             }
                         </div>
 
@@ -385,7 +385,7 @@
                                    type="email" @bind="NewContact.Email" />
                             @if (SubmitAttempted && string.IsNullOrWhiteSpace(NewContact.Email))
                             {
-                                <div class="invalid-feedback">Email is required.</div>
+                                <div class="text-danger mt-1">Please enter a valid email address.</div>
                             }
                         </div>
 
@@ -426,7 +426,7 @@
 
                     <div class="modal-footer">
                         <button class="btn btn-primary" @onclick="AddContactAsync">Save Contact</button>
-                        <button class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                            <button class="btn btn-danger" @onclick="CloseModal">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -626,7 +626,7 @@
 
         if (!isValid)
         {
-            if (SelectedTransferFrom == SelectedTransferTo)
+            if (!string.IsNullOrWhiteSpace(SelectedTransferFrom) && !string.IsNullOrWhiteSpace(SelectedTransferTo) && SelectedTransferFrom == SelectedTransferTo)
             {
                 await JS.InvokeVoidAsync("alert", "Transfer From and Transfer To cannot be the same account!");
             }
@@ -673,7 +673,7 @@
         }
 
         var fromAccount = Accounts.FirstOrDefault(a => a.AccountId == SelectedTransferFromTab2);
-        var toContact = Contacts.FirstOrDefault(c => c.AccountNumber == SelectedTransferToTab2);
+        var toContact = Contacts.FirstOrDefault(c => c.AccountId == SelectedTransferToTab2);
 
         SelectedFromSummary = fromAccount != null ? $"{fromAccount.AccountName} - {fromAccount.AccountNumber}" : "Unknown Account";
         SelectedToSummary = toContact != null ? $"{toContact.Name ?? toContact.NickName} - {toContact.AccountNumber}" : "Unknown Contact";
@@ -714,6 +714,7 @@
             {
                 AccountNumberFrom = ActiveTab == "MyAccounts" ? SelectedTransferFrom : SelectedTransferFromTab2,
                 AccountNumberTo = ActiveTab == "MyAccounts" ? SelectedTransferTo : SelectedTransferToTab2,
+                TransactionType = "Fund Transfer",
                 Amount = decimal.Parse(Model.Amount),
                 Currency = "CAD",
                 IsSelfTransfer = ActiveTab == "MyAccounts",

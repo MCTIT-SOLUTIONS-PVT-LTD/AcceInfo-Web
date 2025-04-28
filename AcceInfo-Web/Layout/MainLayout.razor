@@ -41,8 +41,8 @@
             await LocalStorage.RemoveItemAsync("user_refreshToken");
             await LocalStorage.RemoveItemAsync("call_datetime");
 
-            await LocalStorage.RemoveItemAsync("user_profilename");
-            await LocalStorage.RemoveItemAsync("user_profilepwd");
+            // await LocalStorage.RemoveItemAsync("user_profilename");
+            // await LocalStorage.RemoveItemAsync("user_profilepwd");
 
             NavigationManager.NavigateTo("/login", true);
         }
@@ -61,20 +61,29 @@
         {
             var refreshToken = await LocalStorage.GetItemAsync<string>("user_refreshToken");
             var authToken = await LocalStorage.GetItemAsync<string>("auth_token"); // get current token if available
-            var user_profilename = await LocalStorage.GetItemAsync<string>("user_profilename");
-            var user_profilepwd = await LocalStorage.GetItemAsync<string>("user_profilepwd");
+            // var user_profilename = await LocalStorage.GetItemAsync<string>("user_profilename");
+            // var user_profilepwd = await LocalStorage.GetItemAsync<string>("user_profilepwd");
 
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
                 // No refresh token found, force logout
+                await LocalStorage.RemoveItemAsync("auth_token");
+                await LocalStorage.RemoveItemAsync("user_name");
+                await LocalStorage.RemoveItemAsync("user_firstName");
+                await LocalStorage.RemoveItemAsync("user_lastName");
+                await LocalStorage.RemoveItemAsync("user_refreshToken");
+                await LocalStorage.RemoveItemAsync("call_datetime");
+
+                // await LocalStorage.RemoveItemAsync("user_profilename");
+                // await LocalStorage.RemoveItemAsync("user_profilepwd");
                 NavigationManager.NavigateTo("/login", true);
                 return;
             }
 
             var payload = new
             {
-                username = user_profilename,
-                password = user_profilepwd,
+                username = "xxxx",
+                password = "xxxx",
                 type = "customer",
                 RefreshToken = refreshToken
             };
@@ -108,8 +117,8 @@
                     await LocalStorage.RemoveItemAsync("user_refreshToken");
                     await LocalStorage.RemoveItemAsync("call_datetime");
 
-                    await LocalStorage.RemoveItemAsync("user_profilename");
-                    await LocalStorage.RemoveItemAsync("user_profilepwd");
+                    // await LocalStorage.RemoveItemAsync("user_profilename");
+                    // await LocalStorage.RemoveItemAsync("user_profilepwd");
 
                     NavigationManager.NavigateTo("/login", true);
                     return;
@@ -131,8 +140,8 @@
                 await LocalStorage.RemoveItemAsync("user_refreshToken");
                 await LocalStorage.RemoveItemAsync("call_datetime");
 
-                await LocalStorage.RemoveItemAsync("user_profilename");
-                await LocalStorage.RemoveItemAsync("user_profilepwd");
+                // await LocalStorage.RemoveItemAsync("user_profilename");
+                // await LocalStorage.RemoveItemAsync("user_profilepwd");
 
                 NavigationManager.NavigateTo("/login", true);
             }
@@ -148,8 +157,8 @@
             await LocalStorage.RemoveItemAsync("user_refreshToken");
             await LocalStorage.RemoveItemAsync("call_datetime");
 
-            await LocalStorage.RemoveItemAsync("user_profilename");
-            await LocalStorage.RemoveItemAsync("user_profilepwd");
+            // await LocalStorage.RemoveItemAsync("user_profilename");
+            // await LocalStorage.RemoveItemAsync("user_profilepwd");
 
 
             NavigationManager.NavigateTo("/login", true);

@@ -100,11 +100,11 @@
                         @if (!ShowConfirmation)
                         {
                             <div class="row">
-                                <div class="col-md-5">
+                                <div class="col-md-6">
                                     <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2 " id="addContactBtn" @onclick="ShowModal">+ Add payee</button>
                                     
                                 </div>
-                                <div class="col-md-5">
+                                <div class="col-md-6">
                                     <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2 float-right" @onclick="AddPayeeRow">
                                         <i class="mdi mdi-account-multiple-plus mr-2"></i>Add bill payee
                                     </button>
@@ -256,7 +256,7 @@
 
 
 <!-- MODAL -->
-<div class="modal fade" id="editor-modal" tabindex="-1" role="dialog" aria-labelledby="editor-title">
+<div class="modal fade" id="editor-modal" tabindex="-1" role="dialog" aria-labelledby="editor-title" style="overflow-y: auto;">
     <div class="modal-dialog" role="document">
         <div class="modal-content form-horizontal">
             <div class="modal-header">
@@ -501,6 +501,7 @@
                 Amount = decimal.TryParse(p.Amount, out var amt) ? amt : 0,
                 Currency = "CAD",
                 Frequency = "Once",
+                TransactionType = "Bill Payment",
                 StartDate = today,
                 EndDate = today,
                 Memo = (string?)null
