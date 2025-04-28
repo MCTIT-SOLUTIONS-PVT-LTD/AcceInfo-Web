@@ -265,7 +265,12 @@
     }
 
     private void ShowAddModal() => ShowModal = true;
-    private void CloseModal() => ShowModal = false;
+    private void CloseModal()
+    {
+        NewContact = new ContactFormModel(); // Reset form
+        SubmitAttempted = false;
+        ShowModal = false;
+    }
 
     private async Task AddContactAsync()
     {

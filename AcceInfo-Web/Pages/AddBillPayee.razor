@@ -290,6 +290,11 @@
             StateHasChanged();
             Console.WriteLine("Error loading categories: " + ex.Message);
         }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task LoadPayeeList()
@@ -322,6 +327,11 @@
             IsLoading = false;
             StateHasChanged();
             Console.WriteLine("Error loading payee list: " + ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
         }
     }
 
@@ -374,6 +384,11 @@
             IsLoading = false;
             StateHasChanged();
             await JSRuntime.InvokeVoidAsync("showToast", $"Unexpected error: {ex.Message}", "error");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
         }
     }
 
