@@ -197,7 +197,7 @@
                             <input type="text" class="otp-input" maxlength="1" id="otp5" onkeyup="moveToNext(this, 'otp6')" />
                             <input type="text" class="otp-input" maxlength="1" id="otp6" onkeyup="moveToNext(this, '')" />
                         </div>
-                        <button class="btn btn-primary btn-block waves-effect waves-light mt-5" type="button" @onclick="HandleOtpSubmit">Continue</button>
+                        <button id="otpContinueButton" class="btn btn-primary btn-block waves-effect waves-light mt-5" type="button" @onclick="HandleOtpSubmit">Continue</button>
 
                         @if (!string.IsNullOrWhiteSpace(OtpApiErrorMessage))
                         {
@@ -235,15 +235,17 @@
     function moveToNext(current, nextFieldId) {
         if (current.value.length === 1 && nextFieldId) {
             document.getElementById(nextFieldId)?.focus();
+        } else if (current.id === 'otp6' && current.value.length === 1) {
+            document.getElementById('otpContinueButton')?.click();
         }
     }
 
     window.getOtpValue = function () {
-        const otp = [...Array(6).keys()]
-            .map(i => document.getElementById("otp" + (i + 1))?.value || "")
-            .join("");
-        console.log("OTP from JS:", otp);
-        return otp;
+        return [...Array(6).keys()].map(i => document.getElementById("otp" + (i + 1))?.value || "").join("");
+    };
+
+    window.focusFirstOtpBox = function () {
+        document.getElementById('otp1')?.focus();
     };
 
     window.showToast = function (message) {
@@ -273,36 +275,10 @@
     private bool ShowOtpSection = false;
     private bool IsLoading = false;
     private string OtpApiErrorMessage = string.Empty;
+    private bool ShouldFocusOtpInput = false;
 
     private bool IsPasswordVisible { get; set; } = false;
-
     private string PasswordInputType => IsPasswordVisible ? "text" : "password";
-
-    private void TogglePasswordVisibility()
-    {
-        IsPasswordVisible = !IsPasswordVisible;
-    }
-    
-
-    private void OnUsernameInput(ChangeEventArgs e)
-    {
-        Username = e.Value?.ToString();
-        ShowUsernameError = string.IsNullOrWhiteSpace(Username);
-
-        // Clear API error as user types
-        if (!string.IsNullOrWhiteSpace(LoginApiErrorMessage))
-            LoginApiErrorMessage = string.Empty;
-    }
-
-    private void OnPasswordInput(ChangeEventArgs e)
-    {
-        Password = e.Value?.ToString();
-        ShowPasswordError = string.IsNullOrWhiteSpace(Password);
-
-        // Clear API error as user types
-        if (!string.IsNullOrWhiteSpace(LoginApiErrorMessage))
-            LoginApiErrorMessage = string.Empty;
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -319,6 +295,36 @@
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (ShouldFocusOtpInput)
+        {
+            await JS.InvokeVoidAsync("focusFirstOtpBox");
+            ShouldFocusOtpInput = false;
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        IsPasswordVisible = !IsPasswordVisible;
+    }
+
+    private void OnUsernameInput(ChangeEventArgs e)
+    {
+        Username = e.Value?.ToString();
+        ShowUsernameError = string.IsNullOrWhiteSpace(Username);
+        if (!string.IsNullOrWhiteSpace(LoginApiErrorMessage))
+            LoginApiErrorMessage = string.Empty;
+    }
+
+    private void OnPasswordInput(ChangeEventArgs e)
+    {
+        Password = e.Value?.ToString();
+        ShowPasswordError = string.IsNullOrWhiteSpace(Password);
+        if (!string.IsNullOrWhiteSpace(LoginApiErrorMessage))
+            LoginApiErrorMessage = string.Empty;
+    }
+
     private async Task HandleLogin()
     {
         ShowUsernameError = string.IsNullOrWhiteSpace(Username);
@@ -333,38 +339,29 @@
 
         try
         {
-            var payload = new
-            {
-                username = Username,
-                password = Password,
-                type = "customer",
-                RefreshToken = ""
-            };
-
+            var payload = new { username = Username, password = Password, type = "customer", RefreshToken = "" };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await Http.PostAsync("https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/auth/login", content);
 
             if (response.IsSuccessStatusCode)
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (string.IsNullOrWhiteSpace(result?.Token))
+                var result = JsonSerializer.Deserialize<LoginResponse>(await response.Content.ReadAsStringAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (!string.IsNullOrWhiteSpace(result?.Token))
+                {
+                    await LocalStorage.SetItemAsync("temp_auth_token", result.Token);
+                    await LocalStorage.SetItemAsync("temp_profilename", Username);
+                    await LocalStorage.SetItemAsync("temp_profilepwd", Password);
+                    if (RememberUsername)
+                        await LocalStorage.SetItemAsync("saved_username", Username);
+                    else
+                        await LocalStorage.RemoveItemAsync("saved_username");
+                    ShowOtpSection = true;
+                    ShouldFocusOtpInput = true;
+                }
+                else
                 {
                     LoginApiErrorMessage = "Login failed: token not received.";
-                    return;
                 }
-
-                await LocalStorage.SetItemAsync("temp_auth_token", result.Token);
-                await LocalStorage.SetItemAsync("temp_profilename", Username);
-                await LocalStorage.SetItemAsync("temp_profilepwd", Password);
-
-                if (RememberUsername)
-                    await LocalStorage.SetItemAsync("saved_username", Username);
-                else
-                    await LocalStorage.RemoveItemAsync("saved_username");
-
-                ShowOtpSection = true;
             }
             else
             {
@@ -408,8 +405,7 @@
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             var response = await Http.SendAsync(request);
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<LoginResponse>(await response.Content.ReadAsStringAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (response.IsSuccessStatusCode && result.Status?.ToLower() == "success")
             {
@@ -422,7 +418,7 @@
                 await LocalStorage.SetItemAsync("call_datetime", DateTime.UtcNow.ToString("o"));
                 await LocalStorage.SetItemAsync("user_profilename", temp_profilename);
                 await LocalStorage.SetItemAsync("user_profilepwd", temp_profilepwd);
-                
+
                 NavigationManager.NavigateTo("/", true);
             }
             else

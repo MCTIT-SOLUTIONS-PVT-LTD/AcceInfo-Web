@@ -61,8 +61,11 @@
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>From Acc.</th>
+                                <th>TransactionNumber</th>
+                                @* <th>From Acc.</th> *@
+                                @* <th>Recipient</th> *@
                                 <th>Recipient</th>
+                                <th>TransactionType</th>
                                 <th>Amount</th>
                                 <th>Status</th>
                             </tr>
@@ -73,10 +76,27 @@
                                 @foreach (var tx in Transactions)
                                 {
                                     <tr>
-                                        <td>@tx.CreatedOn.ToString("MMM dd, yyyy")</td>
-                                        <td>@tx.FromAccountType (@tx.FromAccountNumber)</td>
-                                        <td>@tx.TransactionToCustomerName (@tx.ToAccountNumber)</td>
-                                        <td>$@tx.Amount.ToString("0.00")</td>
+                                            <td>@tx.CreatedOn.ToString("MMM dd, yyyy")</td>
+                                        <td>@tx.TransactionNumber</td>
+                                            @* <td>@tx.TransactionFromCustomerName (@tx.FromAccountType) (@MaskAccountNumber(tx.FromAccountNumber))</td>
+                                            <td>@tx.TransactionToCustomerName (@tx.ToAccountNumber)</td> *@
+                                           
+                                       
+                                            @if (SelectedAccountId == tx.TransactionFrom)
+                                            { 
+                                                <td>
+                                                    @tx.TransactionToCustomerName (@tx.ToAccountNumber)
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td>@tx.TransactionFromCustomerName (@tx.FromAccountNumber)</td>
+                                            }
+
+                                        <td>@tx.TransactionType</td>
+                                        <td style="color:@(tx.IsCredit ? "green" : "red")">
+                                            @(tx.IsCredit ? $"+${tx.Amount:0.00}" : $"-${tx.Amount:0.00}")
+                                        </td>
                                         <td>Success</td>
                                     </tr>
                                 }
@@ -223,6 +243,15 @@
         }
     }
 
+    private string MaskAccountNumber(string accountNumber)
+    {
+        if (string.IsNullOrEmpty(accountNumber) || accountNumber.Length < 4)
+            return accountNumber;
+
+        var last4 = accountNumber.Substring(accountNumber.Length - 4);
+        return $"XXXXXXXXX-{last4}";
+    }
+
     public class TransactionModel
     {
         public string TransactionId { get; set; }
@@ -239,6 +268,10 @@
         public bool IsCredit { get; set; }
         public string FromAccountType { get; set; }
         public string ToAccountType { get; set; }
+        public string TransactionType { get; set; }
+        public string TransactionNumber { get; set; }
+        
+        
     }
 
     public class AccountModel

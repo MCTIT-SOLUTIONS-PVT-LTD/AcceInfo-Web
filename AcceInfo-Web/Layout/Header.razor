@@ -1,6 +1,23 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
+
+<style>
+    .avatar {
+        width: 64px;
+        height: 64px;
+        color: white;
+        font-weight: bold;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 3px solid white;
+        overflow: hidden;
+    }
+</style>
+
 <header>
     <div class="topbar">
         <nav class="navbar-custom">
@@ -69,8 +86,36 @@
 
     <div class="page-wrapper-img">
         <div class="page-wrapper-img-inner">
-            <div class="sidebar-user media">
+            @* <div class="sidebar-user media">
                 <img src="assets/images/users/user-1.jpg" alt="user" class="rounded-circle img-thumbnail mb-1">
+                <span class="online-icon"><i class="mdi mdi-record text-success"></i></span>
+                <div class="media-body">
+                    <h5 class="text-light">Welcome, @FirstName @LastName</h5>
+                    <ul class="list-unstyled list-inline mb-0 mt-2">
+                        <li class="list-inline-item">
+                            <a href="#"><i class="mdi mdi-account text-light"></i></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#"><i class="mdi mdi-settings text-light"></i></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#" @onclick="Logout"><i class="mdi mdi-power text-danger"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div> *@
+
+            <div class="sidebar-user media">
+                <div class="avatar rounded-circle mb-1" style="background-color:@BackgroundColor;">
+                    @if (!string.IsNullOrEmpty(FirstName) && !string.IsNullOrEmpty(LastName))
+                    {
+                        <span>@(FirstName.Substring(0, 1).ToUpper())@(LastName.Substring(0, 1).ToUpper())</span>
+                    }
+                    else
+                    {
+                        <span>--</span> <!-- default if not available -->
+                    }
+                </div>
                 <span class="online-icon"><i class="mdi mdi-record text-success"></i></span>
                 <div class="media-body">
                     <h5 class="text-light">Welcome, @FirstName @LastName</h5>
@@ -113,6 +158,7 @@
     private string UserName = "";
     private string FirstName = "";
     private string LastName = "";
+    private string BackgroundColor;
 
     protected override async Task OnInitializedAsync()
     {
@@ -130,6 +176,29 @@
             FirstName = F_Name;
             LastName = L_Name;
         }
+
+        BackgroundColor = GetRandomColor();
+    }
+
+    private string GetRandomColor()
+    {
+        var colors = new List<string>
+    {
+        "#4a90e2", // Blue
+        "#50e3c2", // Teal
+        "#f5a623", // Orange
+        "#9013fe", // Purple
+        "#7ed321", // Green
+        "#f8e71c", // Yellow
+        "#d0021b", // Red
+        "#b8e986", // Light Green
+        "#bd10e0", // Pink
+        "#417505"  // Dark Green
+    };
+
+        var random = new Random();
+        int index = random.Next(colors.Count);
+        return colors[index];
     }
 
     private async Task Logout()
@@ -142,8 +211,8 @@
         await LocalStorage.RemoveItemAsync("call_datetime");
         await LocalStorage.RemoveItemAsync("user_contactId");
 
-        await LocalStorage.RemoveItemAsync("user_profilename");
-        await LocalStorage.RemoveItemAsync("user_profilepwd");
+        // await LocalStorage.RemoveItemAsync("user_profilename");
+        // await LocalStorage.RemoveItemAsync("user_profilepwd");
 
         NavigationManager.NavigateTo("/login", true);
     }

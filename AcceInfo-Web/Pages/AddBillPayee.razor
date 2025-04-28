@@ -12,14 +12,14 @@
 
 
 
-    <div class="row">
-        <SideNavSlider />
+<div class="row">
+    <SideNavSlider />
 
-        <div class="col-lg-9">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
+    <div class="col-lg-9">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
                         @if (IsLoading)
                         {
                             <div class="spinner-overlay">
@@ -28,98 +28,103 @@
                                 </div>
                             </div>
                         }
-                            <div class="float-left align-item-center mt-2">
-                                <h3 class="text-primary"><u>Add a Payee</u></h3>
-                            </div>
-                            <div class="float-right align-item-center mt-2">
-                                <button class="btn btn-primary px-4" @onclick="ShowModal">ADD</button>
-                            </div>
+                        <div class="float-left align-item-center mt-2">
+                            <h3 class="text-primary"><u>Add a Payee</u></h3>
+                        </div>
+                        <div class="float-right align-item-center mt-2">
+                            <button class="btn btn-primary px-4" @onclick="ShowAddModal">ADD</button>
+                        </div>
 
                         <table class="table mb-0" id="AddBillTable">
-                                <thead>
-                                    <tr>
-                                        <th>Payee Name</th>
-                                        <th>Payee Type</th>
-                                        <th>Account Number</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (payeeList != null && payeeList.Any())
-                                    {
-                                        @foreach (var item in payeeList)
-                                        {
-                                            <tr>
-                                                <td>@item.PayeeName</td>
-                                                <td>@item.PayeeTypeName</td>
-                                                <td>@item.PayeeNumber</td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
+                            <thead>
+                                <tr>
+                                    <th>Payee Name</th>
+                                    <th>Payee Type</th>
+                                    <th>Account Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (payeeList != null && payeeList.Any())
+                                {
+                                    @foreach (var item in payeeList)
                                     {
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted">No payees found.</td>
+                                            <td>@item.PayeeName</td>
+                                            <td>@item.PayeeTypeName</td>
+                                            <td>@item.PayeeNumber</td>
                                         </tr>
                                     }
-                                </tbody>
-                            </table>
-                        </div>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">No payees found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 
 <!-- MODAL -->
-<div class="modal fade" id="editor-modal" tabindex="-1" role="dialog" aria-labelledby="editor-title">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content form-horizontal">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editor-title">Add Payee</h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <div class="col-sm-12 mb-3">
-                    <label>Payee Name <small class="text-danger font-13">*</small></label>
-                    <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
-                    @if (ShowPayeeNameError)
-                    {
-                        <div class="text-danger">Payee Name is required.</div>
-                    }
+@if (ShowModal)
+{
+    <div class="modal show d-block" tabindex="-1" role="dialog" style="overflow-y: auto;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content form-horizontal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editor-title">Add Payee</h5>
+                    <button type="button" class="close" @onclick="CloseModal"><span>&times;</span></button>
                 </div>
-
-                <div class="col-sm-12 mb-3">
-                    <label>Payee Type <small class="text-danger font-13">*</small></label>
-                    <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
-                        <option value="">-- Select --</option>
-                        @foreach (var category in payeeCategories)
+                <div class="modal-body">
+                    <div class="col-sm-12 mb-3">
+                        <label>Payee Name <small class="text-danger font-13">*</small></label>
+                        <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                        @if (ShowPayeeNameError)
                         {
-                            <option value="@category.PayeeTypeId">@category.Name</option>
+                            <div class="text-danger">Payee Name is required.</div>
                         }
-                    </select>
-                    @if (ShowPayeeTypeError)
-                    {
-                        <div class="text-danger">Payee Type is required.</div>
-                    }
-                </div>
+                    </div>
 
-                <div class="col-sm-12 mb-3">
-                    <label>Account Number <small class="text-danger font-13">*</small></label>
-                    <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
-                    @if (ShowPayeeNumberError)
-                    {
-                        <div class="text-danger">Account Number is required.</div>
-                    }
+                    <div class="col-sm-12 mb-3">
+                        <label>Payee Type <small class="text-danger font-13">*</small></label>
+                        <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
+                            <option value="">-- Select --</option>
+                            @foreach (var category in payeeCategories)
+                            {
+                                <option value="@category.PayeeTypeId">@category.Name</option>
+                            }
+                        </select>
+                        @if (ShowPayeeTypeError)
+                        {
+                            <div class="text-danger">Payee Type is required.</div>
+                        }
+                    </div>
+
+                    <div class="col-sm-12 mb-3">
+                        <label>Account Number <small class="text-danger font-13">*</small></label>
+                        <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                        @if (ShowPayeeNumberError)
+                        {
+                            <div class="text-danger">Account Number is required.</div>
+                        }
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" @onclick="HandlePayeeSubmit">Save</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="HandlePayeeSubmit">Save</button>
+                    <button type="button" class="btn btn-danger" @onclick="CloseModal">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
+
+
 
 <!-- Toast -->
 <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;">
@@ -197,6 +202,7 @@
 @code {
     private bool IsLoading = false;
     private string AuthToken;
+    private bool ShowModal = false;
 
     public class PayeeCategory
     {
@@ -338,8 +344,7 @@
     private async Task HandlePayeeSubmit()
     {
 
-        IsLoading = true;
-        StateHasChanged();
+        
 
         ShowPayeeNameError = string.IsNullOrWhiteSpace(newPayee.PayeeName);
         ShowPayeeTypeError = string.IsNullOrWhiteSpace(newPayee.PayeeType);
@@ -347,6 +352,10 @@
 
         if (ShowPayeeNameError || ShowPayeeTypeError || ShowPayeeNumberError)
             return;
+
+
+        IsLoading = true;
+        StateHasChanged();
 
         try
         {
@@ -372,6 +381,7 @@
                 newPayee = new PayeeAddRequest();
                 await LoadPayeeList();
                 await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
+                CloseModal();
             }
             else
             {
@@ -392,8 +402,11 @@
         }
     }
 
-    private async Task ShowModal()
+
+    private void CloseModal()
     {
-        await JSRuntime.InvokeVoidAsync("showModal", "editor-modal");
+        ShowModal = false;
     }
+
+    private void ShowAddModal() => ShowModal = true;
 }

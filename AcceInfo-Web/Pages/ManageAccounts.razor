@@ -78,7 +78,7 @@
                         </select>
                         @if (ShowAccountTypeError)
                         {
-                            <div class="text-danger">Account Type is required.</div>
+                            <div class="text-danger">Please select an account type.</div>
                         }
                     </div>
                     <div class="form-group">
@@ -86,7 +86,7 @@
                         <input type="text" class="form-control" @bind="NewAccount.AccountName" />
                         @if (ShowAccountNameError)
                         {
-                            <div class="text-danger">Account Name is required.</div>
+                            <div class="text-danger">Please enter the account name.</div>
                         }
                     </div>
                     <div class="form-group">
@@ -94,7 +94,7 @@
                         <input type="text" class="form-control" @bind="NewAccount.Amount" />
                         @if (ShowAmountError)
                         {
-                            <div class="text-danger">Amount is required and must be a valid number.</div>
+                            <div class="text-danger">Please enter a valid amount greater than $0.</div>
                         }
                     </div>
                 </div>
