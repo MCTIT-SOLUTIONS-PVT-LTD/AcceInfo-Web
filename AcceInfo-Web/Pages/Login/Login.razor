@@ -356,6 +356,8 @@
                 }
 
                 await LocalStorage.SetItemAsync("temp_auth_token", result.Token);
+                await LocalStorage.SetItemAsync("temp_profilename", Username);
+                await LocalStorage.SetItemAsync("temp_profilepwd", Password);
 
                 if (RememberUsername)
                     await LocalStorage.SetItemAsync("saved_username", Username);
@@ -395,6 +397,8 @@
         try
         {
             var token = await LocalStorage.GetItemAsync<string>("temp_auth_token");
+            var temp_profilename = await LocalStorage.GetItemAsync<string>("temp_profilename");
+            var temp_profilepwd = await LocalStorage.GetItemAsync<string>("temp_profilepwd");
 
             var payload = new { otp = otp };
             var request = new HttpRequestMessage(HttpMethod.Post, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/auth/otp-verify")
@@ -414,6 +418,10 @@
                 await LocalStorage.SetItemAsync("user_firstName", result.FirstName);
                 await LocalStorage.SetItemAsync("user_lastName", result.LastName);
                 await LocalStorage.SetItemAsync("user_contactId", result.ContactId);
+                await LocalStorage.SetItemAsync("user_refreshToken", result.RefreshToken);
+                await LocalStorage.SetItemAsync("call_datetime", DateTime.UtcNow.ToString("o"));
+                await LocalStorage.SetItemAsync("user_profilename", temp_profilename);
+                await LocalStorage.SetItemAsync("user_profilepwd", temp_profilepwd);
                 
                 NavigationManager.NavigateTo("/", true);
             }

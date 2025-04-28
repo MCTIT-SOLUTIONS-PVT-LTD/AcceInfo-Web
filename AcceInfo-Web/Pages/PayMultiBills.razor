@@ -2,6 +2,7 @@
 @layout MainLayout
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 @inject IJSRuntime JS
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
@@ -100,7 +101,11 @@
                         {
                             <div class="row">
                                 <div class="col-md-5">
-                                    <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2" @onclick="AddPayeeRow">
+                                    <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2 " id="addContactBtn" @onclick="ShowModal">+ Add payee</button>
+                                    
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2 float-right" @onclick="AddPayeeRow">
                                         <i class="mdi mdi-account-multiple-plus mr-2"></i>Add bill payee
                                     </button>
                                 </div>
@@ -249,6 +254,115 @@
     </div>
 </div>
 
+
+<!-- MODAL -->
+<div class="modal fade" id="editor-modal" tabindex="-1" role="dialog" aria-labelledby="editor-title">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content form-horizontal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editor-title">Add Payee</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="col-sm-12 mb-3">
+                    <label>Payee Name <small class="text-danger font-13">*</small></label>
+                    <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                    @if (ShowPayeeNameError)
+                    {
+                        <div class="text-danger">Payee Name is required.</div>
+                    }
+                </div>
+
+                <div class="col-sm-12 mb-3">
+                    <label>Payee Type <small class="text-danger font-13">*</small></label>
+                    <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
+                        <option value="">-- Select --</option>
+                        @foreach (var category in payeeCategories)
+                        {
+                            <option value="@category.PayeeTypeId">@category.Name</option>
+                        }
+                    </select>
+                    @if (ShowPayeeTypeError)
+                    {
+                        <div class="text-danger">Payee Type is required.</div>
+                    }
+                </div>
+
+                <div class="col-sm-12 mb-3">
+                    <label>Account Number <small class="text-danger font-13">*</small></label>
+                    <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                    @if (ShowPayeeNumberError)
+                    {
+                        <div class="text-danger">Account Number is required.</div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" @onclick="HandlePayeeSubmit">Save</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Toast -->
+<div aria-live="polite" aria-atomic="true" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;">
+    <div id="customToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000" data-autohide="true">
+        <div id="toastHeader" class="toast-header d-flex justify-content-between w-100">
+            <strong id="toastTitle">Info</strong>
+            <button type="button" class="close ms-auto" data-bs-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body" id="toastMessage">Placeholder</div>
+        <div class="progress" style="height: 4px;">
+            <div id="toastProgress" class="progress-bar" role="progressbar" style="width: 100%; transition: width 3s linear;"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    window.showToast = (message, type = 'success') => {
+    const header = $('#toastHeader');
+    const title = $('#toastTitle');
+    const progress = $('#toastProgress');
+
+    header.removeClass('bg-success bg-danger text-white');
+    progress.removeClass('bg-success bg-danger');
+
+    if (type === 'success') {
+    header.addClass('bg-success text-white');
+    title.text('Success');
+    // progress.addClass('bg-light');
+    } else {
+    header.addClass('bg-danger text-white');
+    title.text('Error');
+    // progress.addClass('bg-light');
+    }
+
+    $('#toastMessage').text(message);
+
+    // Reset progress instantly and force reflow
+    progress.css({ width: '100%', transition: 'none' });
+    progress[0].offsetWidth; // ✅ Force browser reflow
+
+    // Animate progress
+    progress.css({ transition: 'width 3s linear', width: '0%' });
+
+    // Show toast
+    $('#customToast').toast('show');
+    };
+
+    function hideModal(modalId) {
+    $('#' + modalId).modal('hide');
+    }
+    function showModal(modalId) {
+    $('#' + modalId).modal('show');
+    }
+</script>
+
 @code {
     private List<AccountModel> Accounts = new();
     private List<PayeeItem> PayeeList = new();
@@ -267,6 +381,7 @@
         ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? string.Empty;
         await FetchAccounts();
         await LoadPayees();
+        await LoadPayeeCategories();
     }
 
     private async Task LoadPayees()
@@ -456,5 +571,149 @@
         public string AccountName { get; set; }
         public string AccountNumber { get; set; }
         public decimal Balance { get; set; }
+    }
+
+
+
+
+
+
+    public class PayeeCategory
+    {
+        public string Name { get; set; }
+        public string PayeeTypeId { get; set; }
+    }
+
+    public class PayeeAddRequest
+    {
+        public string PayeeName { get; set; }
+        public string PayeeNumber { get; set; }
+        public string PayeeType { get; set; }
+    }
+
+
+    public class BaseResponseModel<T>
+    {
+        public string Status { get; set; }
+        public T Data { get; set; }
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+    }
+
+    private List<PayeeCategory> payeeCategories = new();
+    private List<PayeeItem> payeeList = new();
+    private PayeeAddRequest newPayee = new();
+
+    private bool ShowPayeeNameError = false;
+    private bool ShowPayeeTypeError = false;
+    private bool ShowPayeeNumberError = false;
+
+    private string PayeeTypeProxy
+    {
+        get => newPayee.PayeeType;
+        set
+        {
+            newPayee.PayeeType = value;
+            ShowPayeeTypeError = string.IsNullOrWhiteSpace(value);
+        }
+    }
+
+
+    private async Task LoadPayeeCategories()
+    {
+        try
+        {
+            IsLoading = true;
+            StateHasChanged();
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/get-payeecategories");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var baseResponse = JsonSerializer.Deserialize<BaseResponseModel<List<PayeeCategory>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (baseResponse?.Data != null)
+                {
+                    payeeCategories = baseResponse.Data;
+                }
+
+                IsLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            IsLoading = false;
+            StateHasChanged();
+            Console.WriteLine("Error loading categories: " + ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandlePayeeSubmit()
+    {
+
+        IsLoading = true;
+        StateHasChanged();
+
+        ShowPayeeNameError = string.IsNullOrWhiteSpace(newPayee.PayeeName);
+        ShowPayeeTypeError = string.IsNullOrWhiteSpace(newPayee.PayeeType);
+        ShowPayeeNumberError = string.IsNullOrWhiteSpace(newPayee.PayeeNumber);
+
+        if (ShowPayeeNameError || ShowPayeeTypeError || ShowPayeeNumberError)
+            return;
+
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/payee-add");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            request.Content = JsonContent.Create(newPayee);
+
+            var response = await Http.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            var result = JsonSerializer.Deserialize<ApiResponse<object>>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            IsLoading = false;
+            StateHasChanged();
+
+            if (response.IsSuccessStatusCode && result != null && result.Status == "Success")
+            {
+                await JSRuntime.InvokeVoidAsync("showToast", result.Message ?? "Payee added successfully!", "success");
+
+                newPayee = new PayeeAddRequest();
+                await LoadPayees();
+                await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
+            }
+            else
+            {
+                var errorMessage = result?.Message ?? "Failed to add payee.";
+                await JSRuntime.InvokeVoidAsync("showToast", errorMessage, "error");
+            }
+        }
+        catch (Exception ex)
+        {
+            IsLoading = false;
+            StateHasChanged();
+            await JSRuntime.InvokeVoidAsync("showToast", $"Unexpected error: {ex.Message}", "error");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ShowModal()
+    {
+        await JSRuntime.InvokeVoidAsync("showModal", "editor-modal");
     }
 }
