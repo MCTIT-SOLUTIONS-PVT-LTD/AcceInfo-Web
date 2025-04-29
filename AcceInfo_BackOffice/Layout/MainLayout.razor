@@ -1,17 +1,174 @@
-﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+﻿@using Blazored.LocalStorage
+@using System.Text.Json
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject IJSRuntime JS
+@inject HttpClient Http
+@using System.Net.Http.Headers
+@using System.Text
+@using Common.Models.Response
+
+<Header />
+<div class="page-wrapper">
+    <!--start page-wrapper-inner -->
+    <div class="page-wrapper-inner">
+        <Navbar />
     </div>
+    <!--end page-wrapper-inner -->
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+    <div class="page-content">
+        <div class="container-fluid">
             @Body
-        </article>
-        @* testline *@
-    </main>
+        </div>
+        <Footer />
+    </div>
 </div>
+
+@code {
+
+    private string LoginApiErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("auth_token");
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            await LocalStorage.RemoveItemAsync("auth_token");
+            await LocalStorage.RemoveItemAsync("user_name");
+            await LocalStorage.RemoveItemAsync("user_firstName");
+            await LocalStorage.RemoveItemAsync("user_lastName");
+            await LocalStorage.RemoveItemAsync("user_refreshToken");
+            await LocalStorage.RemoveItemAsync("call_datetime");
+
+            // await LocalStorage.RemoveItemAsync("user_profilename");
+            // await LocalStorage.RemoveItemAsync("user_profilepwd");
+
+            NavigationManager.NavigateTo("/login", true);
+        }
+        else
+        {
+            await FetchNewToken();
+        }
+    }
+
+
+    private async Task FetchNewToken()
+    {
+        LoginApiErrorMessage = string.Empty;
+
+        try
+        {
+            var refreshToken = await LocalStorage.GetItemAsync<string>("user_refreshToken");
+            var authToken = await LocalStorage.GetItemAsync<string>("auth_token"); // get current token if available
+            // var user_profilename = await LocalStorage.GetItemAsync<string>("user_profilename");
+            // var user_profilepwd = await LocalStorage.GetItemAsync<string>("user_profilepwd");
+
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                // No refresh token found, force logout
+                await LocalStorage.RemoveItemAsync("auth_token");
+                await LocalStorage.RemoveItemAsync("user_name");
+                await LocalStorage.RemoveItemAsync("user_firstName");
+                await LocalStorage.RemoveItemAsync("user_lastName");
+                await LocalStorage.RemoveItemAsync("user_refreshToken");
+                await LocalStorage.RemoveItemAsync("call_datetime");
+
+                // await LocalStorage.RemoveItemAsync("user_profilename");
+                // await LocalStorage.RemoveItemAsync("user_profilepwd");
+                NavigationManager.NavigateTo("/login", true);
+                return;
+            }
+
+            var payload = new
+            {
+                username = "xxxx",
+                password = "xxxx",
+                type = "customer",
+                RefreshToken = refreshToken
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/auth/login")
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+                };
+
+            // ✅ Add existing auth token in header
+            if (!string.IsNullOrWhiteSpace(authToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+            }
+
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (string.IsNullOrWhiteSpace(result?.Token))
+                {
+                    LoginApiErrorMessage = "Session refresh failed: token not received.";
+
+                    await LocalStorage.RemoveItemAsync("auth_token");
+                    await LocalStorage.RemoveItemAsync("user_name");
+                    await LocalStorage.RemoveItemAsync("user_firstName");
+                    await LocalStorage.RemoveItemAsync("user_lastName");
+                    await LocalStorage.RemoveItemAsync("user_refreshToken");
+                    await LocalStorage.RemoveItemAsync("call_datetime");
+
+                    // await LocalStorage.RemoveItemAsync("user_profilename");
+                    // await LocalStorage.RemoveItemAsync("user_profilepwd");
+
+                    NavigationManager.NavigateTo("/login", true);
+                    return;
+                }
+
+                await LocalStorage.SetItemAsync("auth_token", result.Token); // Save new token
+                await LocalStorage.SetItemAsync("user_refreshToken", result.RefreshToken); // Save new refresh token
+                // await LocalStorage.SetItemAsync("user_contactId", result.ContactId); 
+                await LocalStorage.SetItemAsync("call_datetime", DateTime.UtcNow.ToString("o"));
+            }
+            else
+            {
+                LoginApiErrorMessage = "Session refresh failed: " + response.StatusCode;
+
+                await LocalStorage.RemoveItemAsync("auth_token");
+                await LocalStorage.RemoveItemAsync("user_name");
+                await LocalStorage.RemoveItemAsync("user_firstName");
+                await LocalStorage.RemoveItemAsync("user_lastName");
+                await LocalStorage.RemoveItemAsync("user_refreshToken");
+                await LocalStorage.RemoveItemAsync("call_datetime");
+
+                // await LocalStorage.RemoveItemAsync("user_profilename");
+                // await LocalStorage.RemoveItemAsync("user_profilepwd");
+
+                NavigationManager.NavigateTo("/login", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            LoginApiErrorMessage = "Session error: " + ex.Message;
+
+            await LocalStorage.RemoveItemAsync("auth_token");
+            await LocalStorage.RemoveItemAsync("user_name");
+            await LocalStorage.RemoveItemAsync("user_firstName");
+            await LocalStorage.RemoveItemAsync("user_lastName");
+            await LocalStorage.RemoveItemAsync("user_refreshToken");
+            await LocalStorage.RemoveItemAsync("call_datetime");
+
+            // await LocalStorage.RemoveItemAsync("user_profilename");
+            // await LocalStorage.RemoveItemAsync("user_profilepwd");
+
+
+            NavigationManager.NavigateTo("/login", true);
+        } 
+    }
+}
+
+
+@* <div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred 123.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div> *@

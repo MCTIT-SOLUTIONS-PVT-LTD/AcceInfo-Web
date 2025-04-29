@@ -1,0 +1,364 @@
+﻿@page "/user-management"
+@layout MainLayout
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IJSRuntime JS
+
+@using System.Text.Json
+@using System.ComponentModel.DataAnnotations
+
+<div class="row">
+    <SideNavSlider />
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        @if (IsLoading)
+                        {
+                            <div class="spinner-overlay">
+                                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="float-left mt-2">
+                            <h3 class="text-primary"><u>User Management (Manage Accounts)</u></h3>
+                        </div>
+                        <div class="float-right mt-2">
+                            <button class="btn btn-primary px-4" @onclick="ShowModal">ADD</button>
+                        </div>
+
+                        <table class="table mb-0 mt-3" id="accountsTable">
+                            <thead>
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>User Name</th>
+                                    <th>Email</th>
+                                    <th>Mobile Number</th>
+                                    <th>Card Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var customer in Customers)
+                                {
+                                    <tr>
+                                        <td>@customer.FirstName</td>
+                                        <td>@customer.LastName</td>
+                                        <td>@customer.UserName</td>
+                                        <td>@customer.Email</td>
+                                        <td>@customer.MobileNumber</td>
+                                        <td>@customer.CardNumber</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ShowAccountModal)
+{
+    <div class="modal show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Customer</h5>
+                    <button type="button" class="close" @onclick="HideModal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>First Name <small class="text-danger">*</small></label>
+                        <input type="text" class="form-control" @bind="NewCustomer.FirstName" />
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name <small class="text-danger">*</small></label>
+                        <input type="text" class="form-control" @bind="NewCustomer.LastName" />
+                    </div>
+                    <div class="form-group">
+                        <label>Password <small class="text-danger">*</small></label>
+                        <input type="password" class="form-control" @bind="NewCustomer.Password" />
+                    </div>
+                    <div class="form-group">
+                        <label>User Name <small class="text-danger">*</small></label>
+                        <input type="text" class="form-control" @bind="NewCustomer.UserName" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email <small class="text-danger">*</small></label>
+                        <input type="email" class="form-control" @bind="NewCustomer.Email" />
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="text" class="form-control" @bind="NewCustomer.MobileNumber" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="AddCustomer">Save changes</button>
+                    <button type="button" class="btn btn-danger" @onclick="HideModal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+<!-- Toast -->
+@* <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;">
+    <div id="customToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000" data-autohide="true">
+        <div id="toastHeader" class="toast-header">
+            <strong class="me-auto" id="toastTitle">Info</strong>
+            <button type="button" class="ml-2 mb-1 close" data-bs-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body" id="toastMessage">Placeholder</div>
+        <div class="progress" style="height: 4px;">
+            <div id="toastProgress" class="progress-bar" role="progressbar" style="width: 100%; transition: width 3s linear;"></div>
+        </div>
+    </div>
+</div> *@
+
+<!-- Toast -->
+<div aria-live="polite" aria-atomic="true" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;">
+    <div id="customToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000" data-autohide="true">
+        <div id="toastHeader" class="toast-header d-flex justify-content-between w-100">
+            <strong id="toastTitle">Info</strong>
+            <button type="button" class="close ms-auto" data-bs-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body" id="toastMessage">Placeholder</div>
+        <div class="progress" style="height: 4px;">
+            <div id="toastProgress" class="progress-bar" role="progressbar" style="width: 100%; transition: width 3s linear;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<link href="/assets/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    window.initializeDataTable = () => {
+        $(document).ready(function () {
+            if ($.fn.dataTable.isDataTable('#accountsTable')) {
+                $('#accountsTable').DataTable().destroy();
+            }
+            $('#accountsTable').DataTable();
+        });
+    };
+
+    window.showToast = (message, type = 'success') => {
+        const header = $('#toastHeader');
+        const title = $('#toastTitle');
+        const progress = $('#toastProgress');
+
+        header.removeClass('bg-success bg-danger text-white');
+        progress.removeClass('bg-success bg-danger');
+
+        if (type === 'success') {
+            header.addClass('bg-success text-white');
+            title.text('Success');
+            // progress.addClass('bg-light');
+        } else {
+            header.addClass('bg-danger text-white');
+            title.text('Error');
+            // progress.addClass('bg-light');
+        }
+
+        $('#toastMessage').text(message);
+
+        // Reset progress instantly and force reflow
+        progress.css({ width: '100%', transition: 'none' });
+        progress[0].offsetWidth; // ✅ Force browser reflow
+
+        // Animate progress
+        progress.css({ transition: 'width 3s linear', width: '0%' });
+
+        // Show toast
+        $('#customToast').toast('show');
+    };
+</script>
+
+<script>
+    window.initializeDataTable = () => {
+        $(document).ready(function () {
+            if (!$.fn.DataTable.isDataTable('#accountsTable')) {
+                $('#accountsTable').DataTable();
+            }
+        });
+    };
+
+    window.destroyDataTable = (selector) => {
+        $(document).ready(function () {
+            if ($.fn.DataTable.isDataTable(selector)) {
+                $(selector).DataTable().destroy();
+            }
+        });
+    };
+</script>
+
+
+
+@code {
+    private bool ShowAccountModal = false;
+    private bool IsLoading = false;
+    private List<Common.Models.Response.AccountCategoriesResponse> AccountTypes = new();
+    private List<CustomerModel> Customers = new();
+    private string UserToken;
+    private string ContactId;
+
+    private bool ShowAccountTypeError = false;
+    private bool ShowAccountNameError = false;
+    private bool ShowAmountError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserToken = await LocalStorage.GetItemAsync<string>("auth_token");
+        ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? string.Empty;
+        await LoadCustomers();
+    }
+
+    private async Task LoadCustomers()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        try
+        {
+            // ✅ Destroy existing DataTable first
+            await JS.InvokeVoidAsync("destroyDataTable", "#accountsTable");
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/GetCustomer");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", UserToken);
+
+            var response = await Http.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var baseResponse = JsonSerializer.Deserialize<Common.Models.BaseResponseModel>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (baseResponse?.Data != null)
+                {
+                    var rawData = JsonSerializer.Serialize(baseResponse.Data);
+                    Customers = JsonSerializer.Deserialize<List<CustomerModel>>(rawData, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+            }
+
+            StateHasChanged(); // ✅ Re-render updated HTML
+            await JS.InvokeVoidAsync("initializeDataTable"); // ✅ Now reinitialize
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error loading customers: " + ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private NewCustomerModel NewCustomer = new();
+
+    public class NewCustomerModel
+    {
+        [Required(ErrorMessage = "First Name is required")]
+        public string FirstName { get; set; }
+
+        [Required(ErrorMessage = "Last Name is required")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Password is required")]
+        public string Password { get; set; }
+
+        [Required(ErrorMessage = "Username is required")]
+        public string UserName { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid Email Address")]
+        public string Email { get; set; }
+
+        public string MobileNumber { get; set; }
+    }
+
+    private async Task AddCustomer()
+    {
+        // Basic Validation
+        if (string.IsNullOrWhiteSpace(NewCustomer.FirstName) ||
+            string.IsNullOrWhiteSpace(NewCustomer.LastName) ||
+            string.IsNullOrWhiteSpace(NewCustomer.Password) ||
+            string.IsNullOrWhiteSpace(NewCustomer.UserName) ||
+            string.IsNullOrWhiteSpace(NewCustomer.Email))
+        {
+            await JS.InvokeVoidAsync("showToast", "Please fill in all required fields.", "error");
+            return;
+        }
+
+        IsLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var payload = new
+            {
+                FirstName = NewCustomer.FirstName,
+                LastName = NewCustomer.LastName,
+                Password = NewCustomer.Password,
+                UserName = NewCustomer.UserName,
+                Email = NewCustomer.Email,
+                MobileNumber = NewCustomer.MobileNumber
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/AddCustomer")
+                {
+                    Content = content
+                };
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", UserToken);
+
+            var response = await Http.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                HideModal();
+                NewCustomer = new(); // Reset form
+
+                await LoadCustomers(); // Reload updated customer list
+                await JS.InvokeVoidAsync("showToast", "Customer added successfully.", "success");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("showToast", "Failed to add customer.", "error");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("AddCustomer Error: " + ex.Message);
+            await JS.InvokeVoidAsync("showToast", "Error occurred while adding customer.", "error");
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private void ShowModal() => ShowAccountModal = true;
+    private void HideModal() => ShowAccountModal = false;
+
+    public class CustomerModel
+    {
+        public string ContactId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string MobileNumber { get; set; }
+        public string CardNumber { get; set; }
+    }
+}
