@@ -5,7 +5,7 @@ VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcceInfo-Web", "AcceInfo-Web.csproj", "{660BB662-1AF6-4E42-A128-7C9CC86C75C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcceInfo_Portal", "..\AcceInfo_Portal\AcceInfo_Portal.csproj", "{4C272278-B267-40CD-B42B-B6E7D1D738D9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcceInfo_BackOffice", "..\AcceInfo_Portal\AcceInfo_BackOffice.csproj", "{4C272278-B267-40CD-B42B-B6E7D1D738D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
