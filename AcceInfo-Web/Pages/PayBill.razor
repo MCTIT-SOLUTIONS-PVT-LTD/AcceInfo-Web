@@ -40,7 +40,7 @@
                                             <h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5>
                                         </div>
                                         <div class="card-body">
-                                            <p class="text-muted">Your bill has been paid successfully. Below is a summary of the transaction.</p>
+                                            <p class="text-success">Your bill has been paid successfully. Below is a summary of the transaction.</p>
 
                                             <dl class="row">
                                                 <dt class="col-sm-4">From Account:</dt>
@@ -59,7 +59,7 @@
                                                 <dd class="col-sm-8">@DateTime.UtcNow.ToString("MMMM dd, yyyy")</dd>
 
                                                 <dt class="col-sm-4">Transaction ID:</dt>
-                                                <dd class="col-sm-8">TXN-@Guid.NewGuid().ToString().Substring(0, 8).ToUpper()</dd>
+                                                <dd class="col-sm-8">@TransactionNumber</dd>
                                             </dl>
 
                                             <div class="text-right mt-3">
@@ -384,6 +384,7 @@
     private bool IsLoading = false;
     private bool ShowSuccessMessage = false;
     private bool ShowModal = false;
+    private string TransactionNumber = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -526,13 +527,11 @@
             var response = await Http.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
 
-            var result = JsonSerializer.Deserialize<ApiResponse<object>>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+            var result = JsonSerializer.Deserialize<ApiResponse<PayBillResponse>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (response.IsSuccessStatusCode && result != null && result.Status == "Success")
             {
+                TransactionNumber = result.Data?.ToAccountNumbers?.FirstOrDefault()?.TransactionNumber ?? "";
                 ShowSuccessMessage = true;
                 ShowConfirmation = false;
                 StateHasChanged();
@@ -553,6 +552,25 @@
             IsLoading = false;
             StateHasChanged();
         }
+    }
+
+    public class PayBillResponse
+    {
+        public string AccountNumberFrom { get; set; }
+        public List<PayBillToAccount> ToAccountNumbers { get; set; }
+    }
+
+    public class PayBillToAccount
+    {
+        public string AccountNumberTo { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public string Frequency { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Memo { get; set; }
+        public string TransactionNumber { get; set; }
+        public string TransactionType { get; set; }
     }
 
     public class PayeeItem { 
@@ -693,7 +711,7 @@
 
                 newPayee = new PayeeAddRequest();
                 await LoadPayees();
-                await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
+               //  await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
                 CloseModal();
             }
             else

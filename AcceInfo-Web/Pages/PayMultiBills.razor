@@ -38,7 +38,7 @@
                                             <h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5>
                                         </div>
                                         <div class="card-body">
-                                            <p class="text-muted">Your bills have been paid successfully. Below is a summary of the transaction.</p>
+                                            <p class="text-success">Your bills have been paid successfully. Below is a summary of the transaction.</p>
 
                                             <dl class="row">
                                                 <dt class="col-sm-4">From Account:</dt>
@@ -58,6 +58,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th>#</th>
+                                                        <th>Transaction Number</th> <!-- ✅ Add this new column -->
                                                         <th>Payee</th>
                                                         <th>Amount</th>
                                                     </tr>
@@ -66,9 +67,13 @@
                                                     @foreach (var (item, index) in BillPayees.Select((val, i) => (val, i + 1)))
                                                     {
                                                         var payee = PayeeList.FirstOrDefault(p => p.PayeeId == item.PayeeId);
+                                                        var txnNumber = TransactionNumbers.ElementAtOrDefault(index - 1) ?? "N/A";
+                                                          <!-- ✅ Pick transaction number by index -->
+
                                                         <tr>
                                                             <td>@index</td>
-                                                            <td>@payee?.PayeeName - <b> @payee?.PayeeTypeName </b>  - @payee?.PayeeNumber </td>
+                                                            <td>@txnNumber</td> <!-- ✅ Show transaction number here -->
+                                                            <td>@payee?.PayeeName - <b>@payee?.PayeeTypeName</b> - @payee?.PayeeNumber</td>
                                                             <td>@($"{Convert.ToDecimal(item.Amount):C2}")</td>
                                                         </tr>
                                                     }
@@ -88,17 +93,15 @@
                                     </div>
                                 </div>
                             </div>
-                        }
-
-                        <div class="row">
-                            <div class="col-md-9">
-                                <p>Paying several bills at once is easy. Just select a payee and enter an amount for each bill.</p>
-                                <p>If you're paying someone new, don't forget to add new payees to your list first.</p>
-                                <p>Remember that your bills will be paid in the order you enter them below. If your account runs out of funds to pay for a bill in your list, all items following it won't be processed either. So make sure to put the most important ones first.</p>
-                            </div>
-                        </div>
-                        @if (!ShowConfirmation)
+                        }else if (!ShowConfirmation)
                         {
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <p>Paying several bills at once is easy. Just select a payee and enter an amount for each bill.</p>
+                                    <p>If you're paying someone new, don't forget to add new payees to your list first.</p>
+                                    <p>Remember that your bills will be paid in the order you enter them below. If your account runs out of funds to pay for a bill in your list, all items following it won't be processed either. So make sure to put the most important ones first.</p>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2 " id="addContactBtn" @onclick="ShowModal">+ Add payee</button>
@@ -110,56 +113,7 @@
                                     </button>
                                 </div>
                             </div>
-                        }
 
-                        @if (ShowConfirmation)
-                        {
-                            <div class="row mt-4">
-                                <div class="col-md-9 offset-md-1">
-                                    <div class="card border border-primary">
-                                        <div class="card-header bg-primary text-white">
-                                            <h5 class="mb-0">Confirm Bill Payment</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p><strong>From Account:</strong> @Accounts.FirstOrDefault(a => a.AccountId == SelectedTransferFrom)?.AccountName (@GetAccountNumberById(SelectedTransferFrom))</p>
-                                            <table class="table table-bordered mt-3">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Payee To</th>
-                                                        <th>Amount</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach (var (item, index) in BillPayees.Select((val, i) => (val, i + 1)))
-                                                    {
-                                                        var payee = PayeeList.FirstOrDefault(p => p.PayeeId == item.PayeeId);
-                                                        <tr>
-                                                            <td>@index</td>
-                                                            <td>@payee?.PayeeName  - <b> @payee?.PayeeTypeName </b> - @payee?.PayeeNumber</td>
-                                                            <td>@($"{Convert.ToDecimal(item.Amount):C2}")</td>
-                                                        </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-
-                                            <div class="text-right mt-3">
-                                                <div class="row justify-content-end">
-                                                    <div class="col-md-3">
-                                                        <button class="btn btn-outline-primary w-100" @onclick="() => ShowConfirmation = false">Back</button>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <button class="btn btn-primary w-100" @onclick="SubmitPayMultiBill">Confirm & Pay</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
                             <div class="row">
                                 <div class="col-md-12 align-self-center">
                                     <EditForm Model="@this" OnValidSubmit="ValidateAndContinue">
@@ -236,7 +190,60 @@
                                     </EditForm>
                                 </div>
                             </div>
+                        } else
+                        {
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <p>Paying several bills at once is easy. Just select a payee and enter an amount for each bill.</p>
+                                    <p>If you're paying someone new, don't forget to add new payees to your list first.</p>
+                                    <p>Remember that your bills will be paid in the order you enter them below. If your account runs out of funds to pay for a bill in your list, all items following it won't be processed either. So make sure to put the most important ones first.</p>
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-md-9 offset-md-1">
+                                    <div class="card border border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0">Confirm Bill Payment</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>From Account:</strong> @Accounts.FirstOrDefault(a => a.AccountId == SelectedTransferFrom)?.AccountName (@GetAccountNumberById(SelectedTransferFrom))</p>
+                                            <table class="table table-bordered mt-3">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Payee To</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var (item, index) in BillPayees.Select((val, i) => (val, i + 1)))
+                                                    {
+                                                        var payee = PayeeList.FirstOrDefault(p => p.PayeeId == item.PayeeId);
+                                                        <tr>
+                                                            <td>@index</td>
+                                                            <td>@payee?.PayeeName  - <b> @payee?.PayeeTypeName </b> - @payee?.PayeeNumber</td>
+                                                            <td>@($"{Convert.ToDecimal(item.Amount):C2}")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+
+                                            <div class="text-right mt-3">
+                                                <div class="row justify-content-end">
+                                                    <div class="col-md-3">
+                                                        <button class="btn btn-outline-primary w-100" @onclick="() => ShowConfirmation = false">Back</button>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <button class="btn btn-primary w-100" @onclick="SubmitPayMultiBill">Confirm & Pay</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         }
+                        
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="alert alert-outline-primary mb-0" role="alert">
@@ -374,6 +381,8 @@
     private string AuthToken = "";
     private bool ShowConfirmation = false;
     private bool ShowSuccessMessage = false;
+
+    private List<string> TransactionNumbers = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -523,6 +532,16 @@
 
             if (response.IsSuccessStatusCode)
             {
+                var apiResponse = JsonSerializer.Deserialize<ApiResponse<PayBillResponse>>(content, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                TransactionNumbers = apiResponse?.Data?.ToAccountNumbers?
+                    .Select(x => x.TransactionNumber ?? "")
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .ToList() ?? new List<string>();
+
                 ShowSuccessMessage = true;
                 ShowConfirmation = false;
                 StateHasChanged();
@@ -541,6 +560,25 @@
             IsLoading = false;
             StateHasChanged();
         }
+    }
+
+    public class PayBillResponse
+    {
+        public string AccountNumberFrom { get; set; }
+        public List<PayBillToAccount> ToAccountNumbers { get; set; }
+    }
+
+    public class PayBillToAccount
+    {
+        public string AccountNumberTo { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public string Frequency { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Memo { get; set; }
+        public string TransactionNumber { get; set; }
+        public string TransactionType { get; set; }
     }
 
     public class PayeeItem
