@@ -372,8 +372,11 @@
         {
             LoginApiErrorMessage = "Login error: " + ex.Message;
         }
-
-        IsLoading = false;
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task HandleOtpSubmit()
@@ -431,7 +434,10 @@
         {
             OtpApiErrorMessage = "OTP verification error: " + ex.Message;
         }
-
-        IsLoading = false;
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
     }
 }

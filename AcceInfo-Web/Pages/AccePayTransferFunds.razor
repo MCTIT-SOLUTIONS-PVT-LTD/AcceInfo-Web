@@ -21,321 +21,400 @@
 }
 <div class="row">
     <SideNavSlider />
-    @if (ShowSuccessMessage)
-    {
-        <div class="col-lg-9">
-            <div class="card p-4 shadow-sm border border-success mt-3">
-                <h4 class="text-success mb-3"><i class="fas fa-check-circle"></i> Transfer Successful!</h4>
-                <p><strong>Transaction Number:</strong> @TransactionNumber</p>
 
-                <div class="text-right mt-4">
-                    <button class="btn btn-primary" @onclick="@(() => NavigationManager.NavigateTo("/transaction-history"))">
-                        View Transaction History
-                    </button>
-                </div>
-            </div>
-        </div>
-    }else if (ShowConfirmation)
-    {
-        <div class="col-lg-9">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row justify-content-center">
-                        <div class="col-md-9">
-                            <div class="card p-3 mb-4 shadow-sm border border-primary">
-                                <h5 class="mb-3 text-primary"><i class="fas fa-receipt"></i> Confirmation</h5>
-                                <dl class="row mb-0">
-                                    <dt class="col-sm-4">Transfer From:</dt>
-                                    <dd class="col-sm-8">@SelectedFromSummary</dd>
-                                    <dt class="col-sm-4">Transfer To:</dt>
-                                    <dd class="col-sm-8">@SelectedToSummary</dd>
 
-                                    <dt class="col-sm-4">Amount:</dt>
-                                    <dd class="col-sm-8 text-primary font-weight-bold">@($"{Convert.ToDecimal(Model.Amount):C2}")</dd>
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-content" id="profile-tabContent">
+                    <div class="tab-pane fade show active">
+                        <!--!--><h3 class="text-primary"><u>Transfer Money</u></h3><div class="row justify-content-center">
+                            @if (ShowSuccessMessage)
+                            {   
+                                <br />
+                                <br />
+                                <div class="col-md-9">
+                                    <div class="card border border-primary shadow-sm">
+                                        <!--!--><div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5></div>
+                                        <div class="card-body">
+                                            <dl class="row mb-0">
+                                                <dt class="col-sm-4">Transfer From:</dt>
+                                                <dd class="col-sm-8">@SelectedFromSummary</dd>
 
-                                    <dt class="col-sm-4">Frequency:</dt>
-                                    <dd class="col-sm-8">@Model.Frequency</dd>
+                                                <dt class="col-sm-4">Transfer To:</dt>
+                                                <dd class="col-sm-8">@SelectedToSummary</dd>
 
-                                    @if (Model.Frequency == "Once")
-                                    {
-                                        <dt class="col-sm-4">Date:</dt>
-                                        <dd class="col-sm-8">@Model.Date?.ToString("yyyy-MM-dd")</dd>
-                                    }
-                                    else
-                                    {
-                                        <dt class="col-sm-4">Start Date:</dt>
-                                        <dd class="col-sm-8">@Model.StartDate?.ToString("yyyy-MM-dd")</dd>
-                                        <dt class="col-sm-4">End Date:</dt>
-                                        <dd class="col-sm-8">@Model.EndDate?.ToString("yyyy-MM-dd")</dd>
-                                    }
+                                                <dt class="col-sm-4">Amount:</dt>
+                                                <dd class="col-sm-8">@($"{decimal.Parse(Model.Amount):C2}")</dd>
 
-                                    <dt class="col-sm-4">Memo:</dt>
-                                    <dd class="col-sm-8">@Model.Memo</dd>
-                                </dl>
-                                <div class="text-right mt-3">
-                                    <div class="row justify-content-end">
-                                        <div class="col-md-3">
-                                            <button class="btn btn-outline-primary w-100" @onclick="BackToForm">Back</button>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Transfer</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="col-lg-9">
-            <div class="card">
-                <div class="card-body">
-                    <div class="tab-content" id="profile-tabContent">
-                        <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
-                            <h3 class="text-primary"><u>Transfer Money</u></h3>
+                                                <dt class="col-sm-4">Currency:</dt>
+                                                <dd class="col-sm-8">CAD</dd>
 
-                            <br />
-                            <div class="single-pro-info-tab">
-                                <ul class="nav nav-pills mb-0 nav-justified" id="pills-tab" role="tablist">
-                                    <li class="nav-item">
-                                        <a class="nav-link @(ActiveTab == "MyAccounts" ? "active" : "")" data-toggle="pill" href="#pay-with-acce-accounts">My Accounts</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link @(ActiveTab == "AnotherMember" ? "active" : "")" data-toggle="pill" href="#pay-with-acce-rewards-points">Another Member</a>
-                                    </li>
-                                </ul>
-                            </div>
+                                                <dt class="col-sm-4">Frequency:</dt>
+                                                <dd class="col-sm-8">@Model.Frequency</dd>
 
-                            <div class="tab-content mt-4" id="pills-tabContent">
-                                <!-- My Accounts Tab -->
-                                <div class="tab-pane fade @(ActiveTab == "MyAccounts" ? "show active" : "")" id="pay-with-acce-accounts">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="row justify-content-center">
-                                                <div class="col-md-9">
-                                                    <form class="mb-0">
-                                                        <div class="form-group">
-                                                            <label>Transfer From <small class="text-danger font-13">*</small></label>
-                                                            <select class="form-control" @bind="SelectedTransferFrom">
-                                                                <option value="">Select</option>
-                                                                @foreach (var account in Accounts)
-                                                                {
-                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
-                                                                }
-                                                            </select>
-                                                            @if (ShowValidation && string.IsNullOrWhiteSpace(SelectedTransferFrom))
-                                                            {
-                                                                        <div class="text-danger">Please select the account to transfer from.</div>
-                                                            }
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label>Transfer To <small class="text-danger font-13">*</small></label>
-                                                            <select class="form-control" @bind="SelectedTransferTo">
-                                                                <option>Select</option>
-                                                                @foreach (var account in Accounts)
-                                                                {
-                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
-                                                                }
-                                                            </select>
-                                                            @if (ShowValidation && string.IsNullOrWhiteSpace(SelectedTransferTo))
-                                                            {
-                                                                        <div class="text-danger">Please select the account to transfer to.</div>
-                                                            }
-                                                        </div>
-                                                        <div class="form-row">
-                                                            <div class="form-group col-md-4">
-                                                                <label>Amount <small class="text-danger font-13">*</small></label>
-                                                                <input type="text" class="form-control" @bind="AmountTab1" placeholder="$0.00" />
-                                                                @if (ShowValidation && string.IsNullOrWhiteSpace(AmountTab1))
-                                                                {
-                                                                            <div class="text-danger">Please enter a valid transfer amount greater than $0.</div>
-                                                                }
-                                                            </div>
-                                                            <div class="form-group col-md-4">
-                                                                <label>Currency</label>
-                                                                <select class="form-control">
-                                                                    <option>CAD</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="form-group col-md-4">
-                                                                <label>Frequency <small class="text-danger font-13">*</small></label>
-                                                                <select class="form-control" @bind="SelectedFrequencyTab1">
-                                                                    <option value="Once">Once</option>
-                                                                    <option value="Weekly">Weekly</option>
-                                                                    <option value="Monthly">Monthly</option>
-                                                                    <option value="Yearly">Yearly</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-row">
-                                                            @if (SelectedFrequencyTab1 == "Once")
-                                                            {
-                                                                <div class="form-group col-md-6">
-                                                                    <label>Date <small class="text-danger font-13">*</small></label>
-                                                                    <input class="form-control" type="date" @bind="OnceDateTab1" />
-                                                                    @if (ShowValidation && (!OnceDateTab1.HasValue || OnceDateTab1.Value < DateTime.Today))
-                                                                    {
-                                                                        <div class="text-danger">Valid date is required.</div>
-                                                                    }
-                                                                </div>
-                                                            }
-                                                            else
-                                                            {
-                                                                <div class="form-group col-md-6">
-                                                                    <label>Start Date <small class="text-danger font-13">*</small></label>
-                                                                    <input class="form-control" type="date" @bind="StartDateTab1" />
-                                                                    @if (ShowValidation && (!StartDateTab1.HasValue || StartDateTab1.Value < DateTime.Today))
-                                                                    {
-                                                                        <div class="text-danger">Start date must be today or later.</div>
-                                                                    }
-                                                                </div>
-                                                                <div class="form-group col-md-6">
-                                                                    <label>End Date <small class="text-danger font-13">*</small></label>
-                                                                    <input class="form-control" type="date" @bind="EndDateTab1" />
-                                                                    @if (ShowValidation && (!EndDateTab1.HasValue || EndDateTab1.Value <= StartDateTab1))
-                                                                    {
-                                                                        <div class="text-danger">End date must be after start date.</div>
-                                                                    }
-                                                                </div>
-                                                            }
-                                                        </div>
+                                                @if (Model.Frequency == "Once")
+                                                {
+                                                    <dt class="col-sm-4">Transfer Date:</dt>
+                                                    <dd class="col-sm-8">@Model.Date?.ToString("MMMM dd, yyyy")</dd>
+                                                }
+                                                else
+                                                {
+                                                    <dt class="col-sm-4">Start Date:</dt>
+                                                    <dd class="col-sm-8">@Model.StartDate?.ToString("MMMM dd, yyyy")</dd>
 
-                                                        <div class="form-group">
-                                                            <label>Memo</label>
-                                                            <input type="text" class="form-control" @bind="MemoTab1" placeholder="Enter memo (optional)" />
-                                                        </div>
+                                                    <dt class="col-sm-4">End Date:</dt>
+                                                    <dd class="col-sm-8">@Model.EndDate?.ToString("MMMM dd, yyyy")</dd>
+                                                }
 
-                                                        <div class="form-row justify-content-end">
-                                                            <div class="col-md-3">
-                                                                <button type="button" class="btn btn-primary w-100" @onclick="OnMyAccountsContinue">Continue</button>
-                                                            </div>
-                                                        </div>
-                                                    </form>
+                                                <dt class="col-sm-4">Memo:</dt>
+                                                <dd class="col-sm-8">@Model.Memo</dd>
+
+                                                <dt class="col-sm-4">Transaction Number:</dt>
+                                                <dd class="col-sm-8">@TransactionNumber</dd>
+
+                                                @* <dt class="col-sm-4">Status:</dt>
+                                                <dd class="col-sm-8"><span class="badge badge-success">Success</span></dd> *@
+                                            </dl>
+
+                                            <div class="text-right mt-3">
+                                                <div class="row justify-content-end">
+                                                    <div class="col-md-3">
+                                                        <button class="btn btn-outline-primary w-100" @onclick="@(() => NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true))">
+                                                            <i class="fas fa-check-circle"></i> Done
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Another Member Tab -->
-                                <div class="tab-pane fade @(ActiveTab == "AnotherMember" ? "show active" : "")" id="pay-with-acce-rewards-points">
-                                    <div class="row">
-                                        <div class="col-md-12">
+                            }
+                            else if (ShowConfirmation)
+                            {
+                                <br />
+                                <br />
+                                <div class="col-lg-9">
+                                    <div class="card">
+                                        <div class="card-body">
                                             <div class="row justify-content-center">
                                                 <div class="col-md-9">
-                                                    <form class="mb-0">
-                                                        <div class="form-group">
-                                                            <label>Transfer From *</label>
-                                                            <select class="form-control" @bind="SelectedTransferFromTab2">
-                                                                <option>Select</option>
-                                                                @foreach (var account in Accounts)
-                                                                {
-                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
-                                                                }
-                                                            </select>
-                                                            <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowAddModal">+ Add Contact</button>
-                                                            @if (ShowValidationAM && string.IsNullOrWhiteSpace(SelectedTransferFromTab2))
+                                                    <div class="card p-3 mb-4 shadow-sm border border-primary">
+                                                        <h5 class="mb-3 text-primary"><i class="fas fa-receipt"></i> Confirmation</h5>
+                                                        <dl class="row mb-0">
+                                                            <dt class="col-sm-4">Transfer From:</dt>
+                                                            <dd class="col-sm-8">@SelectedFromSummary</dd>
+                                                            <dt class="col-sm-4">Transfer To:</dt>
+                                                            <dd class="col-sm-8">@SelectedToSummary</dd>
+
+                                                            <dt class="col-sm-4">Amount:</dt>
+                                                            <dd class="col-sm-8 text-primary font-weight-bold">@($"{Convert.ToDecimal(Model.Amount):C2}")</dd>
+
+                                                            <dt class="col-sm-4">Frequency:</dt>
+                                                            <dd class="col-sm-8">@Model.Frequency</dd>
+
+                                                            @if (Model.Frequency == "Once")
                                                             {
-                                                                        <div class="text-danger">Please select the account to transfer from.</div>
-                                                            }
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label>Transfer To *</label>
-                                                            <select class="form-control" @bind="SelectedTransferToTab2">
-                                                                <option>Select</option>
-                                                                @foreach (var contact in Contacts)
-                                                                {
-                                                                    <option value="@contact.AccountId">@($"{contact.Name ?? contact.NickName} - {contact.AccountNumber}")</option>
-                                                                }
-                                                            </select>
-                                                            @if (ShowValidationAM && string.IsNullOrWhiteSpace(SelectedTransferToTab2))
-                                                            {
-                                                                <div class="text-danger">Please select the account to transfer to.</div>
-                                                            }
-                                                        </div>
-                                                        <div class="form-row">
-                                                            <div class="form-group col-md-4">
-                                                                <label>Amount *</label>
-                                                                <input type="text" class="form-control" placeholder="$0.00" @bind="AmountTab2">
-                                                                @if (ShowValidationAM && string.IsNullOrWhiteSpace(AmountTab2))
-                                                                {
-                                                                    <div class="text-danger">Please enter a valid transfer amount greater than $0.</div>
-                                                                }
-                                                            </div>
-                                                            <div class="form-group col-md-4">
-                                                                <label>Currency</label>
-                                                                <select class="form-control">
-                                                                    <option>CAD</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="form-group col-md-4">
-                                                                <label>Frequency *</label>
-                                                                <select class="form-control" @bind="SelectedFrequencyTab2">
-                                                                    <option value="Once">Once</option>
-                                                                    <option value="Weekly">Weekly</option>
-                                                                    <option value="Monthly">Monthly</option>
-                                                                    <option value="Yearly">Yearly</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-row">
-                                                            @if (SelectedFrequencyTab2 == "Once")
-                                                            {
-                                                                <div class="form-group col-md-6">
-                                                                    <label>Date *</label>
-                                                                    <input class="form-control" type="date" @bind="OnceDateTab2">
-                                                                    @if (ShowValidationAM && (!OnceDateTab2.HasValue || OnceDateTab2.Value < DateTime.Today))
-                                                                    {
-                                                                        <div class="text-danger">Valid date is required.</div>
-                                                                    }
-                                                                </div>
+                                                                <dt class="col-sm-4">Date:</dt>
+                                                                <dd class="col-sm-8">@Model.Date?.ToString("yyyy-MM-dd")</dd>
                                                             }
                                                             else
                                                             {
-                                                                <div class="form-group col-md-6">
-                                                                    <label>Start Date *</label>
-                                                                    <input class="form-control" type="date" @bind="StartDateTab2">
-                                                                    @if (ShowValidationAM && (!StartDateTab2.HasValue || StartDateTab2.Value < DateTime.Today))
-                                                                    {
-                                                                        <div class="text-danger">Start date must be today or later.</div>
-                                                                    }
-                                                                </div>
-                                                                <div class="form-group col-md-6">
-                                                                    <label>End Date *</label>
-                                                                    <input class="form-control" type="date" @bind="EndDateTab2">
-                                                                    @if (ShowValidationAM && (!EndDateTab2.HasValue || EndDateTab2.Value <= StartDateTab2))
-                                                                    {
-                                                                        <div class="text-danger">End date must be after start date.</div>
-                                                                    }
-                                                                </div>
+                                                                <dt class="col-sm-4">Start Date:</dt>
+                                                                <dd class="col-sm-8">@Model.StartDate?.ToString("yyyy-MM-dd")</dd>
+                                                                <dt class="col-sm-4">End Date:</dt>
+                                                                <dd class="col-sm-8">@Model.EndDate?.ToString("yyyy-MM-dd")</dd>
                                                             }
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label>Memo</label>
-                                                            <input type="text" class="form-control" @bind="MemoTab2" placeholder="Enter memo (optional)" />
-                                                        </div>
-                                                        <div class="form-row justify-content-end">
-                                                            <div class="col-md-3">
-                                                                <button type="button" class="btn btn-primary w-100" @onclick="OnAnotherMemberContinue">Continue</button>
+
+                                                            <dt class="col-sm-4">Memo:</dt>
+                                                            <dd class="col-sm-8">@Model.Memo</dd>
+                                                        </dl>
+                                                        <div class="text-right mt-3">
+                                                            <div class="row justify-content-end">
+                                                                <div class="col-md-3">
+                                                                    <button class="btn btn-outline-primary w-100" @onclick="BackToForm">Back</button>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Transfer</button>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </form>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            }
+                            else
+                            {
+                                <div class="col-lg-9">
+                                    <div class="tab-content" id="profile-tabContent">
+                                        <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
+                                            @* <h3 class="text-primary"><u>Transfer Money</u></h3> *@
+
+                                            <br />
+                                            <div class="single-pro-info-tab">
+                                                <ul class="nav nav-pills mb-0 nav-justified" id="pills-tab" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link @(ActiveTab == "MyAccounts" ? "active" : "")" data-toggle="pill" href="#pay-with-acce-accounts">My Accounts</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link @(ActiveTab == "AnotherMember" ? "active" : "")" data-toggle="pill" href="#pay-with-acce-rewards-points">Another Member</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                            <div class="tab-content mt-4" id="pills-tabContent">
+                                                <!-- My Accounts Tab -->
+                                                <div class="tab-pane fade @(ActiveTab == "MyAccounts" ? "show active" : "")" id="pay-with-acce-accounts">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="row justify-content-center">
+                                                                <div class="col-md-9">
+                                                                    <form class="mb-0">
+                                                                        <div class="form-group">
+                                                                            <label>Transfer From <small class="text-danger font-13">*</small></label>
+                                                                            <select class="form-control" @bind="SelectedTransferFrom">
+                                                                                <option value="">Select</option>
+                                                                                @foreach (var account in Accounts)
+                                                                                {
+                                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                                                }
+                                                                            </select>
+                                                                            @if (ShowValidation && string.IsNullOrWhiteSpace(SelectedTransferFrom))
+                                                                            {
+                                                                                <div class="text-danger">Please select the account to transfer from.</div>
+                                                                            }
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label>Transfer To <small class="text-danger font-13">*</small></label>
+                                                                            <select class="form-control" @bind="SelectedTransferTo">
+                                                                                <option>Select</option>
+                                                                                @foreach (var account in Accounts)
+                                                                                {
+                                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                                                }
+                                                                            </select>
+                                                                            @if (ShowValidation && string.IsNullOrWhiteSpace(SelectedTransferTo))
+                                                                            {
+                                                                                <div class="text-danger">Please select the account to transfer to.</div>
+                                                                            }
+                                                                        </div>
+                                                                        <div class="form-row">
+                                                                            <div class="form-group col-md-4">
+                                                                                <label>Amount <small class="text-danger font-13">*</small></label>
+                                                                                <input type="text" class="form-control" @bind="AmountTab1" placeholder="$0.00" />
+                                                                                @if (ShowValidation && string.IsNullOrWhiteSpace(AmountTab1))
+                                                                                {
+                                                                                    <div class="text-danger">Please enter a valid transfer amount greater than $0.</div>
+                                                                                }
+                                                                            </div>
+                                                                            <div class="form-group col-md-4">
+                                                                                <label>Currency</label>
+                                                                                <select class="form-control">
+                                                                                    <option>CAD</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="form-group col-md-4">
+                                                                                <label>Frequency <small class="text-danger font-13">*</small></label>
+                                                                                <select class="form-control" @bind="SelectedFrequencyTab1">
+                                                                                    <option value="Once">Once</option>
+                                                                                    <option value="Weekly">Weekly</option>
+                                                                                    <option value="Monthly">Monthly</option>
+                                                                                    <option value="Yearly">Yearly</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-row">
+                                                                            @if (SelectedFrequencyTab1 == "Once")
+                                                                            {
+                                                                                <div class="form-group col-md-6">
+                                                                                    <label>Date <small class="text-danger font-13">*</small></label>
+                                                                                    <input class="form-control" type="date" @bind="OnceDateTab1" />
+                                                                                    @if (ShowValidation && (!OnceDateTab1.HasValue || OnceDateTab1.Value < DateTime.Today))
+                                                                                    {
+                                                                                        <div class="text-danger">Valid date is required.</div>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <div class="form-group col-md-6">
+                                                                                    <label>Start Date <small class="text-danger font-13">*</small></label>
+                                                                                    <input class="form-control" type="date" @bind="StartDateTab1" />
+                                                                                    @if (ShowValidation && (!StartDateTab1.HasValue || StartDateTab1.Value < DateTime.Today))
+                                                                                    {
+                                                                                        <div class="text-danger">Start date must be today or later.</div>
+                                                                                    }
+                                                                                </div>
+                                                                                <div class="form-group col-md-6">
+                                                                                    <label>End Date <small class="text-danger font-13">*</small></label>
+                                                                                    <input class="form-control" type="date" @bind="EndDateTab1" />
+                                                                                    @if (ShowValidation && (!EndDateTab1.HasValue || EndDateTab1.Value <= StartDateTab1))
+                                                                                    {
+                                                                                        <div class="text-danger">End date must be after start date.</div>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+
+                                                                        <div class="form-group">
+                                                                            <label>Memo</label>
+                                                                            <input type="text" class="form-control" @bind="MemoTab1" placeholder="Enter memo (optional)" />
+                                                                        </div>
+
+                                                                        <div class="form-row justify-content-end">
+                                                                            <div class="col-md-3">
+                                                                                <button type="button" class="btn btn-primary w-100" @onclick="OnMyAccountsContinue">Continue</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Another Member Tab -->
+                                                <div class="tab-pane fade @(ActiveTab == "AnotherMember" ? "show active" : "")" id="pay-with-acce-rewards-points">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="row justify-content-center">
+                                                                <div class="col-md-9">
+                                                                    <form class="mb-0">
+                                                                        <div class="form-group">
+                                                                            <label>Transfer From *</label>
+                                                                            <select class="form-control" @bind="SelectedTransferFromTab2">
+                                                                                <option>Select</option>
+                                                                                @foreach (var account in Accounts)
+                                                                                {
+                                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                                                }
+                                                                            </select>
+                                                                            <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowAddModal">+ Add Contact</button>
+                                                                            @if (ShowValidationAM && string.IsNullOrWhiteSpace(SelectedTransferFromTab2))
+                                                                            {
+                                                                                <div class="text-danger">Please select the account to transfer from.</div>
+                                                                            }
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label>Transfer To *</label>
+                                                                            <select class="form-control" @bind="SelectedTransferToTab2">
+                                                                                <option>Select</option>
+                                                                                @foreach (var contact in Contacts)
+                                                                                {
+                                                                                    <option value="@contact.AccountId">@($"{contact.Name ?? contact.NickName} - {contact.AccountNumber}")</option>
+                                                                                }
+                                                                            </select>
+                                                                            @if (ShowValidationAM && string.IsNullOrWhiteSpace(SelectedTransferToTab2))
+                                                                            {
+                                                                                <div class="text-danger">Please select the account to transfer to.</div>
+                                                                            }
+                                                                        </div>
+                                                                        <div class="form-row">
+                                                                            <div class="form-group col-md-4">
+                                                                                <label>Amount *</label>
+                                                                                <input type="text" class="form-control" placeholder="$0.00" @bind="AmountTab2">
+                                                                                @if (ShowValidationAM && string.IsNullOrWhiteSpace(AmountTab2))
+                                                                                {
+                                                                                    <div class="text-danger">Please enter a valid transfer amount greater than $0.</div>
+                                                                                }
+                                                                            </div>
+                                                                            <div class="form-group col-md-4">
+                                                                                <label>Currency</label>
+                                                                                <select class="form-control">
+                                                                                    <option>CAD</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="form-group col-md-4">
+                                                                                <label>Frequency *</label>
+                                                                                <select class="form-control" @bind="SelectedFrequencyTab2">
+                                                                                    <option value="Once">Once</option>
+                                                                                    <option value="Weekly">Weekly</option>
+                                                                                    <option value="Monthly">Monthly</option>
+                                                                                    <option value="Yearly">Yearly</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-row">
+                                                                            @if (SelectedFrequencyTab2 == "Once")
+                                                                            {
+                                                                                <div class="form-group col-md-6">
+                                                                                    <label>Date *</label>
+                                                                                    <input class="form-control" type="date" @bind="OnceDateTab2">
+                                                                                    @if (ShowValidationAM && (!OnceDateTab2.HasValue || OnceDateTab2.Value < DateTime.Today))
+                                                                                    {
+                                                                                        <div class="text-danger">Valid date is required.</div>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <div class="form-group col-md-6">
+                                                                                    <label>Start Date *</label>
+                                                                                    <input class="form-control" type="date" @bind="StartDateTab2">
+                                                                                    @if (ShowValidationAM && (!StartDateTab2.HasValue || StartDateTab2.Value < DateTime.Today))
+                                                                                    {
+                                                                                        <div class="text-danger">Start date must be today or later.</div>
+                                                                                    }
+                                                                                </div>
+                                                                                <div class="form-group col-md-6">
+                                                                                    <label>End Date *</label>
+                                                                                    <input class="form-control" type="date" @bind="EndDateTab2">
+                                                                                    @if (ShowValidationAM && (!EndDateTab2.HasValue || EndDateTab2.Value <= StartDateTab2))
+                                                                                    {
+                                                                                        <div class="text-danger">End date must be after start date.</div>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label>Memo</label>
+                                                                            <input type="text" class="form-control" @bind="MemoTab2" placeholder="Enter memo (optional)" />
+                                                                        </div>
+                                                                        <div class="form-row justify-content-end">
+                                                                            <div class="col-md-3">
+                                                                                <button type="button" class="btn btn-primary w-100" @onclick="OnAnotherMemberContinue">Continue</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        </div><!--!--><br>
+                        <!--!-->
+                        <div class="row justify-content-center">
+                            
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-outline-primary mb-0" role="alert">
+                                            <h4 class="alert-heading font-18"><i class="fas fa-info-circle"></i> When are my transactions processed?</h4>
+                                            <p>Transactions you make on business days before <strong>6 p.m.</strong> will be processed by us the same day.</p>
+                                            <p>Transactions made at all other times will be processed by us the next business day.</p>
+                                            <p>Payments to third parties (such as utility bills and non-RBC credit cards) often need more processing time by the third party — which generally takes up to <strong>3 business days</strong>. It's a good idea to check with these third parties to find out how far in advance you should make the payments in order to meet their due date.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                           
+                           
+                         </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    }
+   
 
     @if (ShowModal)
     {

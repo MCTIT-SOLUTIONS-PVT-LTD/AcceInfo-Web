@@ -380,7 +380,7 @@
 
                 newPayee = new PayeeAddRequest();
                 await LoadPayeeList();
-                await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
+               // await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
                 CloseModal();
             }
             else
