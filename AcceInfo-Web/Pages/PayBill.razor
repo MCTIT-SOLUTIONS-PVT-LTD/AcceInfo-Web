@@ -2,13 +2,15 @@
 @layout MainLayout
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
-@inject IJSRuntime JS
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text.Json
 @using System.Net.Http.Headers
 @using System.Text
+
+@inject IJSRuntime JSRuntime
+@inject IJSRuntime JS
 
 
 @if (IsLoading)
@@ -38,7 +40,7 @@
                                             <h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5>
                                         </div>
                                         <div class="card-body">
-                                            <p class="text-muted">Your bill has been paid successfully. Below is a summary of the transaction.</p>
+                                            <p class="text-success">Your bill has been paid successfully. Below is a summary of the transaction.</p>
 
                                             <dl class="row">
                                                 <dt class="col-sm-4">From Account:</dt>
@@ -57,7 +59,7 @@
                                                 <dd class="col-sm-8">@DateTime.UtcNow.ToString("MMMM dd, yyyy")</dd>
 
                                                 <dt class="col-sm-4">Transaction ID:</dt>
-                                                <dd class="col-sm-8">TXN-@Guid.NewGuid().ToString().Substring(0, 8).ToUpper()</dd>
+                                                <dd class="col-sm-8">@TransactionNumber</dd>
                                             </dl>
 
                                             <div class="text-right mt-3">
@@ -113,7 +115,7 @@
                                                 <div class="col-md-3">
                                                     <button class="btn btn-outline-primary w-100" @onclick="BackToForm">Back</button>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                     <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Pay a Bill</button>
                                                 </div>
                                             </div>
@@ -155,7 +157,7 @@
                                                             <option value="@payee.PayeeId">@payee.PayeeName - @payee.PayeeTypeName - @payee.PayeeNumber</option>
                                                         }
                                                     </select>
-                                                    <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn">+ Add payee</button>
+                                                        <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowAddModal">+ Add payee</button>
                                                     <ValidationMessage For="@(() => Model.PayeeId)" class="text-danger" />
                                                 </div>
                                             </div>
@@ -184,8 +186,8 @@
                                         </div>
 
                                         <div class="row">
-                                           
-                                            
+
+
                                             @if (Model.Frequency == "Once")
                                             {
                                                 <div class="col-md-6">
@@ -210,7 +212,7 @@
                                                         <label>End Date</label>
                                                         <InputDate class="form-control" @bind-Value="Model.EndDate" />
                                                         <ValidationMessage For="@(() => Model.EndDate)" class="text-danger" />
-                                                     </div>
+                                                    </div>
                                                 </div>
                                             }
                                         </div>
@@ -259,6 +261,117 @@
     </div>
 </div>
 
+<!-- MODAL -->
+@if (ShowModal)
+{
+        <div class="modal show d-block" tabindex="-1" role="dialog" style="overflow-y: auto;">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content form-horizontal">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editor-title">Add Payee</h5>
+                        <button type="button" class="close" @onclick="CloseModal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-sm-12 mb-3">
+                            <label>Payee Name <small class="text-danger font-13">*</small></label>
+                            <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                        @if (ShowPayeeNameError)
+                        {
+                                    <div class="text-danger">Payee Name is required.</div>
+                        }
+                        </div>
+
+                        <div class="col-sm-12 mb-3">
+                            <label>Payee Type <small class="text-danger font-13">*</small></label>
+                            <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
+                                <option value="">-- Select --</option>
+                            @foreach (var category in payeeCategories)
+                            {
+                                        <option value="@category.PayeeTypeId">@category.Name</option>
+                            }
+                            </select>
+                        @if (ShowPayeeTypeError)
+                        {
+                                    <div class="text-danger">Payee Type is required.</div>
+                        }
+                        </div>
+
+                        <div class="col-sm-12 mb-3">
+                            <label>Account Number <small class="text-danger font-13">*</small></label>
+                            <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                        @if (ShowPayeeNumberError)
+                        {
+                                    <div class="text-danger">Account Number is required.</div>
+                        }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" @onclick="HandlePayeeSubmit">Save</button>
+                        <button type="button" class="btn btn-danger" @onclick="CloseModal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+}
+
+
+<!-- Toast -->
+<div aria-live="polite" aria-atomic="true" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;">
+    <div id="customToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000" data-autohide="true">
+        <div id="toastHeader" class="toast-header d-flex justify-content-between w-100">
+            <strong id="toastTitle">Info</strong>
+            <button type="button" class="close ms-auto" data-bs-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body" id="toastMessage">Placeholder</div>
+        <div class="progress" style="height: 4px;">
+            <div id="toastProgress" class="progress-bar" role="progressbar" style="width: 100%; transition: width 3s linear;"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    window.showToast = (message, type = 'success') => {
+    const header = $('#toastHeader');
+    const title = $('#toastTitle');
+    const progress = $('#toastProgress');
+
+    header.removeClass('bg-success bg-danger text-white');
+    progress.removeClass('bg-success bg-danger');
+
+    if (type === 'success') {
+    header.addClass('bg-success text-white');
+    title.text('Success');
+    // progress.addClass('bg-light');
+    } else {
+    header.addClass('bg-danger text-white');
+    title.text('Error');
+    // progress.addClass('bg-light');
+    }
+
+    $('#toastMessage').text(message);
+
+    // Reset progress instantly and force reflow
+    progress.css({ width: '100%', transition: 'none' });
+    progress[0].offsetWidth; // ✅ Force browser reflow
+
+    // Animate progress
+    progress.css({ transition: 'width 3s linear', width: '0%' });
+
+    // Show toast
+    $('#customToast').toast('show');
+    };
+
+    // function hideModal(modalId) {
+    // $('#' + modalId).modal('hide');
+    // }
+    // function showModal(modalId) {
+    // $('#' + modalId).modal('show');
+    // }
+</script>
+
 @code {
     private List<AccountModel> Accounts = new();
     private List<PayeeItem> PayeeList = new();
@@ -270,6 +383,8 @@
     private string ContactId = "";
     private bool IsLoading = false;
     private bool ShowSuccessMessage = false;
+    private bool ShowModal = false;
+    private string TransactionNumber = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -277,6 +392,7 @@
         ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? "";
         await FetchAccounts();
         await LoadPayees();
+        await LoadPayeeCategories();
     }
 
     private async Task FetchAccounts()
@@ -394,6 +510,7 @@
                     AccountNumberTo = Model.PayeeId,
                     Amount = decimal.TryParse(Model.Amount, out var amt) ? amt : 0,
                     Currency = "CAD",
+                    TransactionType = "Bill Payment",
                     Frequency = Model.Frequency,
                     StartDate = Model.Frequency == "Once" ? today : Model.StartDate?.ToString("yyyy-MM-dd"),
                     EndDate = Model.Frequency == "Once" ? today : Model.EndDate?.ToString("yyyy-MM-dd"),
@@ -410,16 +527,21 @@
             var response = await Http.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
 
-            if (response.IsSuccessStatusCode)
+            var result = JsonSerializer.Deserialize<ApiResponse<PayBillResponse>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (response.IsSuccessStatusCode && result != null && result.Status == "Success")
             {
+                TransactionNumber = result.Data?.ToAccountNumbers?.FirstOrDefault()?.TransactionNumber ?? "";
                 ShowSuccessMessage = true;
                 ShowConfirmation = false;
                 StateHasChanged();
             }
             else
             {
-                await JS.InvokeVoidAsync("alert", $"❌ Error: {response.StatusCode}\n{content}");
+                // await JS.InvokeVoidAsync("alert", $"❌ Error: {response.StatusCode}\n{content}");
+                await JS.InvokeVoidAsync("alert", $"Pay Bill failed: {result?.Message ?? "Unknown error"}");
             }
+
         }
         catch (Exception ex)
         {
@@ -432,7 +554,191 @@
         }
     }
 
-    public class PayeeItem { public string PayeeId { get; set; } public string PayeeName { get; set; } public string PayeeNumber { get; set; } public string PayeeType { get; set; } public string PayeeTypeName { get; set; } }
-    public class ApiResponse<T> { public string Status { get; set; } public T Data { get; set; } public string Message { get; set; } public int StatusCode { get; set; } }
-    public class AccountModel { public string AccountId { get; set; } public string AccountName { get; set; } public string AccountNumber { get; set; } public decimal Balance { get; set; } }
+    public class PayBillResponse
+    {
+        public string AccountNumberFrom { get; set; }
+        public List<PayBillToAccount> ToAccountNumbers { get; set; }
+    }
+
+    public class PayBillToAccount
+    {
+        public string AccountNumberTo { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public string Frequency { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Memo { get; set; }
+        public string TransactionNumber { get; set; }
+        public string TransactionType { get; set; }
+    }
+
+    public class PayeeItem { 
+        public string PayeeId { get; set; }
+        public string PayeeName { get; set; } 
+        public string PayeeNumber { get; set; } 
+        public string PayeeType { get; set; } 
+        public string PayeeTypeName { get; set; } 
+    }
+
+    public class ApiResponse<T> { 
+        public string Status { get; set; } 
+        public T Data { get; set; } 
+        public string Message { get; set; } 
+        public int StatusCode { get; set; } 
+    }
+
+    public class AccountModel {
+        public string AccountId { get; set; } 
+        public string AccountName { get; set; } 
+        public string AccountNumber { get; set; } 
+        public decimal Balance { get; set; } 
+    }
+
+
+    public class PayeeCategory
+    {
+        public string Name { get; set; }
+        public string PayeeTypeId { get; set; }
+    }
+
+    public class PayeeAddRequest
+    {
+        public string PayeeName { get; set; }
+        public string PayeeNumber { get; set; }
+        public string PayeeType { get; set; }
+    }
+
+
+    public class BaseResponseModel<T>
+    {
+        public string Status { get; set; }
+        public T Data { get; set; }
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+    }
+
+    private List<PayeeCategory> payeeCategories = new();
+    private List<PayeeItem> payeeList = new();
+    private PayeeAddRequest newPayee = new();
+
+    private bool ShowPayeeNameError = false;
+    private bool ShowPayeeTypeError = false;
+    private bool ShowPayeeNumberError = false;
+
+    private string PayeeTypeProxy
+    {
+        get => newPayee.PayeeType;
+        set
+        {
+            newPayee.PayeeType = value;
+            ShowPayeeTypeError = string.IsNullOrWhiteSpace(value);
+        }
+    }
+
+
+    private async Task LoadPayeeCategories()
+    {
+        try
+        {
+            IsLoading = true;
+            StateHasChanged();
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/get-payeecategories");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var baseResponse = JsonSerializer.Deserialize<BaseResponseModel<List<PayeeCategory>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (baseResponse?.Data != null)
+                {
+                    payeeCategories = baseResponse.Data;
+                }
+
+                IsLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            IsLoading = false;
+            StateHasChanged();
+            Console.WriteLine("Error loading categories: " + ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandlePayeeSubmit()
+    {
+
+        
+
+        ShowPayeeNameError = string.IsNullOrWhiteSpace(newPayee.PayeeName);
+        ShowPayeeTypeError = string.IsNullOrWhiteSpace(newPayee.PayeeType);
+        ShowPayeeNumberError = string.IsNullOrWhiteSpace(newPayee.PayeeNumber);
+
+        if (ShowPayeeNameError || ShowPayeeTypeError || ShowPayeeNumberError)
+            return;
+
+        IsLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/payee-add");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            request.Content = JsonContent.Create(newPayee);
+
+            var response = await Http.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            var result = JsonSerializer.Deserialize<ApiResponse<object>>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            IsLoading = false;
+            StateHasChanged();
+
+            if (response.IsSuccessStatusCode && result != null && result.Status == "Success")
+            {
+                await JSRuntime.InvokeVoidAsync("showToast", result.Message ?? "Payee added successfully!", "success");
+
+                newPayee = new PayeeAddRequest();
+                await LoadPayees();
+               //  await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
+                CloseModal();
+            }
+            else
+            {
+                var errorMessage = result?.Message ?? "Failed to add payee.";
+                await JSRuntime.InvokeVoidAsync("showToast", errorMessage, "error");
+            }
+        }
+        catch (Exception ex)
+        {
+            IsLoading = false;
+            StateHasChanged();
+            await JSRuntime.InvokeVoidAsync("showToast", $"Unexpected error: {ex.Message}", "error");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+    }
+
+    private void ShowAddModal() => ShowModal = true;
+
+
 }
