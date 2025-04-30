@@ -20,49 +20,71 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        @if (IsLoading)
-                        {
-                            <div class="spinner-overlay">
-                                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                                    <span class="sr-only">Loading...</span>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="ribbon-1">
+                                    <div class="ribbon-box">
+                                        <h3><div class="ribbon ribbon-mark bg-primary">Add a Payee</div></h3>
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                @if (IsLoading)
+                                                {
+                                                    <div class="spinner-overlay">
+                                                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                                                            <span class="sr-only">Loading...</span>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                <div class="row justify-content-end">
+                                                    <div class="col-md-3"><button class="btn btn-primary px-4 float-right" @onclick="ShowAddModal">ADD</button></div>
+                                                </div>
+                                                <br/>
+
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <table class="table mb-0" id="AddBillTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Payee Name</th>
+                                                                    <th>Payee Type</th>
+                                                                    <th>Account Number</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @if (payeeList != null && payeeList.Any())
+                                                                {
+                                                                    @foreach (var item in payeeList)
+                                                                    {
+                                                                        <tr>
+                                                                            <td>@item.PayeeName</td>
+                                                                            <td>@item.PayeeTypeName</td>
+                                                                            <td>@item.PayeeNumber</td>
+                                                                        </tr>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td colspan="4" class="text-center text-muted">No payees found.</td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                
+
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        }
-                        <div class="float-left align-item-center mt-2">
-                            <h3 class="text-primary"><u>Add a Payee</u></h3>
                         </div>
-                        <div class="float-right align-item-center mt-2">
-                            <button class="btn btn-primary px-4" @onclick="ShowAddModal">ADD</button>
-                        </div>
-
-                        <table class="table mb-0" id="AddBillTable">
-                            <thead>
-                                <tr>
-                                    <th>Payee Name</th>
-                                    <th>Payee Type</th>
-                                    <th>Account Number</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (payeeList != null && payeeList.Any())
-                                {
-                                    @foreach (var item in payeeList)
-                                    {
-                                        <tr>
-                                            <td>@item.PayeeName</td>
-                                            <td>@item.PayeeTypeName</td>
-                                            <td>@item.PayeeNumber</td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted">No payees found.</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                        
                     </div>
                 </div>
             </div>

@@ -27,235 +27,257 @@
     <div class="col-lg-9">
         <div class="card">
             <div class="card-body">
-                <div class="tab-content" id="profile-tabContent">
-                    <div class="tab-pane fade show active">
-                        <h3 class="text-primary"><u>Pay a Bill</u></h3>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="ribbon-1">
+                            <div class="ribbon-box">
+                                <h3><div class="ribbon ribbon-mark bg-primary">Pay a Bill</div></h3>
 
-                        @if (ShowSuccessMessage)
-                        {
-                            <div class="row justify-content-center">
-                                <div class="col-md-9">
-                                    <div class="card border border-primary shadow-sm">
-                                        <div class="card-header bg-primary text-white">
-                                            <h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="text-success">Your bill has been paid successfully. Below is a summary of the transaction.</p>
-
-                                            <dl class="row">
-                                                <dt class="col-sm-4">From Account:</dt>
-                                                <dd class="col-sm-8">@SelectedFromSummary</dd>
-
-                                                <dt class="col-sm-4">To Payee:</dt>
-                                                <dd class="col-sm-8">@SelectedToSummary</dd>
-
-                                                <dt class="col-sm-4">Amount:</dt>
-                                                <dd class="col-sm-8">@($"{Convert.ToDecimal(Model.Amount):C2}")</dd>
-
-                                                <dt class="col-sm-4">Frequency:</dt>
-                                                <dd class="col-sm-8">@Model.Frequency</dd>
-
-                                                <dt class="col-sm-4">Payment Date:</dt>
-                                                <dd class="col-sm-8">@DateTime.UtcNow.ToString("MMMM dd, yyyy")</dd>
-
-                                                <dt class="col-sm-4">Transaction ID:</dt>
-                                                <dd class="col-sm-8">@TransactionNumber</dd>
-                                            </dl>
-
-                                            <div class="text-right mt-3">
-                                                <div class="row justify-content-end">
-                                                    <div class="col-md-3">
-                                                        <button class="btn btn-outline-primary w-100" @onclick="@(() => NavigationManager.NavigateTo(NavigationManager.Uri, true))">
-                                                            <i class="fas fa-check-circle"></i> Done
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        else if (ShowConfirmation)
-                        {
-                            <div class="row justify-content-center">
-                                <div class="col-md-9">
-                                    <div class="card p-3 mb-4 shadow-sm border border-primary">
-                                        <h5 class="mb-3 text-primary"><i class="fas fa-receipt"></i> Confirmation</h5>
-                                        <dl class="row mb-0">
-                                            <dt class="col-sm-4">Pay From:</dt>
-                                            <dd class="col-sm-8">@SelectedFromSummary</dd>
-                                            <dt class="col-sm-4">Pay To:</dt>
-                                            <dd class="col-sm-8">@SelectedToSummary</dd>
-
-                                            <dt class="col-sm-4">Amount:</dt>
-                                            <dd class="col-sm-8 text-primary font-weight-bold">@($"{Convert.ToDecimal(Model.Amount):C2}")</dd>
-
-                                            <dt class="col-sm-4">Frequency:</dt>
-                                            <dd class="col-sm-8">@Model.Frequency</dd>
-
-                                            @if (Model.Frequency == "Once")
-                                            {
-                                                <dt class="col-sm-4">Date:</dt>
-                                                <dd class="col-sm-8">@Model.Date?.ToString("yyyy-MM-dd")</dd>
-                                            }
-                                            else
-                                            {
-                                                <dt class="col-sm-4">Start Date:</dt>
-                                                <dd class="col-sm-8">@Model.StartDate?.ToString("yyyy-MM-dd")</dd>
-                                                <dt class="col-sm-4">End Date:</dt>
-                                                <dd class="col-sm-8">@Model.EndDate?.ToString("yyyy-MM-dd")</dd>
-                                            }
-
-                                            <dt class="col-sm-4">Memo:</dt>
-                                            <dd class="col-sm-8">@Model.Memo</dd>
-                                        </dl>
-                                        <div class="text-right mt-3">
-                                            <div class="row justify-content-end">
-                                                <div class="col-md-3">
-                                                    <button class="btn btn-outline-primary w-100" @onclick="BackToForm">Back</button>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Pay a Bill</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <EditForm Model="@Model" OnValidSubmit="HandleContinue">
-                                <DataAnnotationsValidator />
-                                <div class="row justify-content-center">
-                                    <div class="col-md-9">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Pay from <small class="text-danger font-13">*</small></label>
-                                                    <select class="form-control" @bind="Model.AccountId">
-                                                        <option value="">Select</option>
-                                                        @foreach (var account in Accounts)
-                                                        {
-                                                            <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
-                                                        }
-                                                    </select>
-                                                    <ValidationMessage For="@(() => Model.AccountId)" class="text-danger" />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Pay To <small class="text-danger font-13">*</small></label>
-                                                    <select class="form-control" @bind="Model.PayeeId">
-                                                        <option value="">Select</option>
-                                                        @foreach (var payee in PayeeList)
-                                                        {
-                                                            <option value="@payee.PayeeId">@payee.PayeeName - @payee.PayeeTypeName - @payee.PayeeNumber</option>
-                                                        }
-                                                    </select>
-                                                        <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowAddModal">+ Add payee</button>
-                                                    <ValidationMessage For="@(() => Model.PayeeId)" class="text-danger" />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Amount <small class="text-danger font-13">*</small></label>
-                                                    <InputText class="form-control" @bind-Value="Model.Amount" />
-                                                    <ValidationMessage For="@(() => Model.Amount)" class="text-danger" />
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Frequency <small class="text-danger font-13">*</small></label>
-                                                    <select class="form-control" @bind="Model.Frequency">
-                                                        <option value="Once">Once</option>
-                                                        <option value="Weekly">Weekly</option>
-                                                        <option value="Monthly">Monthly</option>
-                                                        <option value="Yearly">Yearly</option>
-                                                    </select>
-                                                    <ValidationMessage For="@(() => Model.Frequency)" class="text-danger" />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-
-
-                                            @if (Model.Frequency == "Once")
-                                            {
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Date</label>
-                                                        <InputDate class="form-control" @bind-Value="Model.Date" />
-                                                        <ValidationMessage For="@(() => Model.Date)" class="text-danger" />
-                                                    </div>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Start Date</label>
-                                                        <InputDate class="form-control" @bind-Value="Model.StartDate" />
-                                                        <ValidationMessage For="@(() => Model.StartDate)" class="text-danger" />
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>End Date</label>
-                                                        <InputDate class="form-control" @bind-Value="Model.EndDate" />
-                                                        <ValidationMessage For="@(() => Model.EndDate)" class="text-danger" />
-                                                    </div>
-                                                </div>
-                                            }
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Memo</label>
-                                                    <InputText class="form-control" @bind-Value="Model.Memo" />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row justify-content-end">
-                                            <div class="col-md-3">
-                                                <button type="reset" class="btn btn-outline-primary w-100">Clear</button>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <button type="submit" class="btn btn-primary w-100">Continue</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </EditForm>
-                        }
-
-                        <br />
-                        <div class="row justify-content-center">
-                            <div class="col-md-9">
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <div class="alert alert-outline-primary mb-0" role="alert">
-                                            <h4 class="alert-heading font-18"><i class="fas fa-comments"></i> When are my transactions processed?</h4>
-                                            <p>Transactions you make on business days before 6:00 pm will be processed by us the same day.</p>
-                                            <p>Transactions made at all other times will be processed by us the next business day.</p>
-                                            <p>Payments to third parties (such as utility bills and non-RBC credit cards) often need more processing time by the third party -- which generally takes up to 3 days.</p>
+                                        <div class="tab-content" id="profile-tabContent">
+                                            <div class="tab-pane fade show active">
+                                                @* <h3 class="text-primary"><u>Pay a Bill</u></h3> *@
+
+                                                @if (ShowSuccessMessage)
+                                                {
+                                                    <div class="row justify-content-center">
+                                                        <div class="col-md-12">
+                                                            <div class="card border border-primary shadow-sm">
+                                                                <div class="card-header bg-primary text-white">
+                                                                    <h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <p class="text-success">Your bill has been paid successfully. Below is a summary of the transaction.</p>
+
+                                                                    <dl class="row">
+                                                                        <dt class="col-sm-4">From Account:</dt>
+                                                                        <dd class="col-sm-8">@SelectedFromSummary</dd>
+
+                                                                        <dt class="col-sm-4">To Payee:</dt>
+                                                                        <dd class="col-sm-8">@SelectedToSummary</dd>
+
+                                                                        <dt class="col-sm-4">Amount:</dt>
+                                                                        <dd class="col-sm-8">@($"{Convert.ToDecimal(Model.Amount):C2}")</dd>
+
+                                                                        <dt class="col-sm-4">Frequency:</dt>
+                                                                        <dd class="col-sm-8">@Model.Frequency</dd>
+
+                                                                        <dt class="col-sm-4">Payment Date:</dt>
+                                                                        <dd class="col-sm-8">@DateTime.UtcNow.ToString("MMMM dd, yyyy")</dd>
+
+                                                                        <dt class="col-sm-4">Transaction ID:</dt>
+                                                                        <dd class="col-sm-8">@TransactionNumber</dd>
+                                                                    </dl>
+
+                                                                    <div class="text-right mt-3">
+                                                                        <div class="row justify-content-end">
+                                                                            <div class="col-md-3">
+                                                                                <button class="btn btn-outline-primary w-100" @onclick="@(() => NavigationManager.NavigateTo(NavigationManager.Uri, true))">
+                                                                                    <i class="fas fa-check-circle"></i> Done
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else if (ShowConfirmation)
+                                                {
+                                                    <div class="row justify-content-center">
+                                                        <div class="col-md-12">
+
+                                                            <div class="card border border-primary shadow-sm">
+                                                                <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="fas fa-receipt"></i> Confirmation</h5></div>
+                                                                <div class="card-body">
+                                                                    <dl class="row mb-0">
+                                                                        <dt class="col-sm-4">Pay From:</dt>
+                                                                        <dd class="col-sm-8">@SelectedFromSummary</dd>
+                                                                        <dt class="col-sm-4">Pay To:</dt>
+                                                                        <dd class="col-sm-8">@SelectedToSummary</dd>
+
+                                                                        <dt class="col-sm-4">Amount:</dt>
+                                                                        <dd class="col-sm-8 text-primary font-weight-bold">@($"{Convert.ToDecimal(Model.Amount):C2}")</dd>
+
+                                                                        <dt class="col-sm-4">Frequency:</dt>
+                                                                        <dd class="col-sm-8">@Model.Frequency</dd>
+
+                                                                        @if (Model.Frequency == "Once")
+                                                                        {
+                                                                            <dt class="col-sm-4">Date:</dt>
+                                                                            <dd class="col-sm-8">@Model.Date?.ToString("yyyy-MM-dd")</dd>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <dt class="col-sm-4">Start Date:</dt>
+                                                                            <dd class="col-sm-8">@Model.StartDate?.ToString("yyyy-MM-dd")</dd>
+                                                                            <dt class="col-sm-4">End Date:</dt>
+                                                                            <dd class="col-sm-8">@Model.EndDate?.ToString("yyyy-MM-dd")</dd>
+                                                                        }
+
+                                                                        <dt class="col-sm-4">Memo:</dt>
+                                                                        <dd class="col-sm-8">@Model.Memo</dd>
+                                                                    </dl>
+                                                                    <div class="text-right mt-3">
+                                                                        <div class="row justify-content-end">
+                                                                            <div class="col-md-3">
+                                                                                <button class="btn btn-outline-primary w-100" @onclick="BackToForm">Back</button>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <button class="btn btn-primary w-100" @onclick="SubmitPayBill">Confirm Pay a Bill</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <EditForm Model="@Model" OnValidSubmit="HandleContinue">
+                                                        <DataAnnotationsValidator />
+                                                        <div class="row justify-content-center">
+                                                            <div class="col-md-12">
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label>Pay from <small class="text-danger font-13">*</small></label>
+                                                                            <select class="form-control" @bind="Model.AccountId">
+                                                                                <option value="">Select</option>
+                                                                                @foreach (var account in Accounts)
+                                                                                {
+                                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                                                }
+                                                                            </select>
+                                                                            <ValidationMessage For="@(() => Model.AccountId)" class="text-danger" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label>Pay To <small class="text-danger font-13">*</small></label>
+                                                                            <select class="form-control" @bind="Model.PayeeId">
+                                                                                <option value="">Select</option>
+                                                                                @foreach (var payee in PayeeList)
+                                                                                {
+                                                                                    <option value="@payee.PayeeId">@payee.PayeeName - @payee.PayeeTypeName - @payee.PayeeNumber</option>
+                                                                                }
+                                                                            </select>
+                                                                            <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowAddModal">+ Add payee</button>
+                                                                            <ValidationMessage For="@(() => Model.PayeeId)" class="text-danger" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label>Amount <small class="text-danger font-13">*</small></label>
+                                                                            <InputText class="form-control" @bind-Value="Model.Amount" />
+                                                                            <ValidationMessage For="@(() => Model.Amount)" class="text-danger" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label>Frequency <small class="text-danger font-13">*</small></label>
+                                                                            <select class="form-control" @bind="Model.Frequency">
+                                                                                <option value="Once">Once</option>
+                                                                                <option value="Weekly">Weekly</option>
+                                                                                <option value="Monthly">Monthly</option>
+                                                                                <option value="Yearly">Yearly</option>
+                                                                            </select>
+                                                                            <ValidationMessage For="@(() => Model.Frequency)" class="text-danger" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row">
+
+
+                                                                    @if (Model.Frequency == "Once")
+                                                                    {
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Date</label>
+                                                                                <InputDate class="form-control" @bind-Value="Model.Date" />
+                                                                                <ValidationMessage For="@(() => Model.Date)" class="text-danger" />
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Start Date</label>
+                                                                                <InputDate class="form-control" @bind-Value="Model.StartDate" />
+                                                                                <ValidationMessage For="@(() => Model.StartDate)" class="text-danger" />
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>End Date</label>
+                                                                                <InputDate class="form-control" @bind-Value="Model.EndDate" />
+                                                                                <ValidationMessage For="@(() => Model.EndDate)" class="text-danger" />
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label>Memo</label>
+                                                                            <InputText class="form-control" @bind-Value="Model.Memo" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row justify-content-end">
+                                                                    <div class="col-md-3">
+                                                                        <button type="reset" class="btn btn-outline-primary w-100">Clear</button>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <button type="submit" class="btn btn-primary w-100">Continue</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </EditForm>
+                                                }
+
+                                                <br />
+                                                <div class="row justify-content-center">
+                                                    <div class="col-md-12">
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <div class="alert alert-outline-primary mb-0" role="alert">
+                                                                    <h4 class="alert-heading font-18"><i class="fas fa-comments"></i> When are my transactions processed?</h4>
+                                                                    <p>Transactions you make on business days before 6:00 pm will be processed by us the same day.</p>
+                                                                    <p>Transactions made at all other times will be processed by us the next business day.</p>
+                                                                    <p>Payments to third parties (such as utility bills and non-RBC credit cards) often need more processing time by the third party -- which generally takes up to 3 days.</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                           
                         </div>
                     </div>
                 </div>
+                
+
+
+                
             </div>
         </div>
     </div>

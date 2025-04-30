@@ -6,6 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService LocalStorage
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 @inject IJSRuntime JS
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
@@ -16,100 +17,96 @@
     <div class="col-lg-9">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h4 class="mb-3">Transaction History</h4>
 
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <label>Select Account</label>
-                        <select class="form-control" @bind="SelectedAccountId">
-                            <option value="">-- Select Account --</option>
-                            @foreach (var acc in Accounts)
-                            {
-                                <option value="@acc.AccountId">@acc.AccountName - @acc.AccountNumber</option>
-                            }
-                        </select>
-                    </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="ribbon-1">
+                            <div class="ribbon-box">
+                                <h3><div class="ribbon ribbon-mark bg-primary">Transaction History</div></h3>
 
-                    <div class="col-md-3">
-                        <label>From</label>
-                        <InputDate class="form-control" @bind-Value="FromDate" />
-                    </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row mb-4">
+                                            <div class="col-md-3">
+                                                <label>Select Account</label>
+                                                <select class="form-control" @bind="SelectedAccountId">
+                                                    <option value="">-- Select Account --</option>
+                                                    @foreach (var acc in Accounts)
+                                                    {
+                                                        <option value="@acc.AccountId">@acc.AccountName - @acc.AccountNumber</option>
+                                                    }
+                                                </select>
+                                            </div>
 
-                    <div class="col-md-3">
-                        <label>To</label>
-                        <InputDate class="form-control" @bind-Value="ToDate" />
-                    </div>
+                                            <div class="col-md-3">
+                                                <label>From</label>
+                                                <InputDate class="form-control" @bind-Value="FromDate" />
+                                            </div>
 
-                    <div class="col-md-3">
-                        <button class="btn btn-dark w-100" style="margin-top: 12%;" @onclick="SearchHistory" disabled="@string.IsNullOrEmpty(SelectedAccountId)">
-                            Search
-                        </button>
-                    </div>
-                </div>
+                                            <div class="col-md-3">
+                                                <label>To</label>
+                                                <InputDate class="form-control" @bind-Value="ToDate" />
+                                            </div>
 
-                @if (IsLoading)
-                {
-                    <div class="text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="sr-only">Loading...</span>
+                                            <div class="col-md-3">
+                                                <button class="btn btn-dark w-100" style="margin-top: 12%;" @onclick="SearchHistory" disabled="@string.IsNullOrEmpty(SelectedAccountId)">
+                                                    Search
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        @if (IsLoading)
+                                        {
+                                            <div class="text-center">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="sr-only">Loading...</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <table class="table" id="historyTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>TransactionNumber</th>
+                                                        <th>Recipient</th>
+                                                        <th>TransactionType</th>
+                                                        <th>Amount</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (Transactions != null && Transactions.Count > 0)
+                                                    {
+                                                        foreach (var tx in Transactions)
+                                                        {
+                                                            <tr>
+                                                                <td>@tx.CreatedOn.ToString("MMM dd, yyyy")</td>
+                                                                <td>@tx.TransactionNumber</td>
+                                                                <td>
+                                                                    @(SelectedAccountId == tx.TransactionFrom
+                                                                        ? $"{tx.TransactionToCustomerName} ({tx.ToAccountNumber})"
+                                                                        : $"{tx.TransactionFromCustomerName} ({tx.FromAccountNumber})")
+                                                                </td>
+                                                                <td>@tx.TransactionType</td>
+                                                                <td style="color:@(tx.IsCredit ? "green" : "red")">
+                                                                    @(tx.IsCredit ? $"+${tx.Amount:0.00}" : $"-${tx.Amount:0.00}")
+                                                                </td>
+                                                                <td>Success</td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                }
-                else
-                {
-                    <table class="table" id="historyTable">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>TransactionNumber</th>
-                                @* <th>From Acc.</th> *@
-                                @* <th>Recipient</th> *@
-                                <th>Recipient</th>
-                                <th>TransactionType</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Transactions != null && Transactions.Count > 0)
-                            {
-                                @foreach (var tx in Transactions)
-                                {
-                                    <tr>
-                                            <td>@tx.CreatedOn.ToString("MMM dd, yyyy")</td>
-                                        <td>@tx.TransactionNumber</td>
-                                            @* <td>@tx.TransactionFromCustomerName (@tx.FromAccountType) (@MaskAccountNumber(tx.FromAccountNumber))</td>
-                                            <td>@tx.TransactionToCustomerName (@tx.ToAccountNumber)</td> *@
-                                           
-                                       
-                                            @if (SelectedAccountId == tx.TransactionFrom)
-                                            { 
-                                                <td>
-                                                    @tx.TransactionToCustomerName (@tx.ToAccountNumber)
-                                                </td>
-                                            }
-                                            else
-                                            {
-                                                <td>@tx.TransactionFromCustomerName (@tx.FromAccountNumber)</td>
-                                            }
-
-                                        <td>@tx.TransactionType</td>
-                                        <td style="color:@(tx.IsCredit ? "green" : "red")">
-                                            @(tx.IsCredit ? $"+${tx.Amount:0.00}" : $"-${tx.Amount:0.00}")
-                                        </td>
-                                        <td>Success</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">No transactions found</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
+                </div>
+                
             </div>
         </div>
     </div>
@@ -119,13 +116,16 @@
 <link href="/assets/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
 <script>
-    window.initializeHistoryTable = () => {
-        if ($.fn.dataTable.isDataTable('#historyTable')) {
-            $('#historyTable').DataTable().destroy();
-        }
-        $('#historyTable').DataTable();
+     window.initializeDataTable = () => {
+        setTimeout(() => {
+            if ($.fn.DataTable.isDataTable('#historyTable')) {
+                $('#historyTable').DataTable().destroy();
+            }
+            $('#historyTable').DataTable();
+        }, 200); // delay to ensure DOM is ready
     };
 </script>
 
@@ -220,11 +220,17 @@
                 if (result != null && result.Status == "Success" && result.Data != null)
                 {
                     Transactions = result.Data;
+                    await JS.InvokeVoidAsync("initializeDataTable");
+                }
+                else
+                {
+                    Transactions = [];
+                    await JS.InvokeVoidAsync("initializeDataTable");
                 }
 
+                IsLoading = false;
                 StateHasChanged();
-                await Task.Delay(300); // 🔥 wait DOM refresh
-                await JS.InvokeVoidAsync("initializeDataTable");
+                
             }
             else
             {
