@@ -9,6 +9,22 @@
 @using System.Text.Json
 @using System.Text
 
+<style>
+    /* Smooth scroll with hidden scrollbar */
+    .modal-body {
+        max-height: 70vh; /* adjust as needed */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; /* iOS smooth scroll */
+        scrollbar-width: none; /* Firefox */
+    }
+
+    /* Hide scrollbar for Chrome, Safari, and Edge */
+    .modal-body::-webkit-scrollbar {
+        display: none;
+    }
+
+</style>
+
 
 @* @if (IsLoading)
 {
@@ -37,40 +53,56 @@
                             </div>
                         }
 
-                        <div class="float-left align-item-center mt-2">
-                            <h3 class="text-primary"><u>Manage Contact</u></h3>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="ribbon-1">
+                                    <div class="ribbon-box">
+                                        <h3><div class="ribbon ribbon-mark bg-primary">Manage Contact</div></h3>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="row justify-content-end">
+                                                    <div class="col-md-3">
+                                                        <button class="btn btn-primary px-4 float-right" @onclick="ShowAddModal">ADD</button>
+                                                    </div>
+                                                </div>
+                                                <br />
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <table class="table mb-0 mt-3" id="contactTable">
+                                                    <thead>
+                                                        <tr>
+                                                            @* <th>ID</th> *@
+                                                            <th>Name</th>
+                                                            @* <th>Nick Name</th> *@
+                                                            <th>Phone Number</th>
+                                                            <th>Email</th>
+                                                            <th>Send Transfers by</th>
+                                                            <th>Preferred Language</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var contact in Contacts)
+                                                        {
+                                                            <tr>
+                                                                @* <td>@contact.Id</td> *@
+                                                                <td>@contact.Name</td>
+                                                                @* <td>@contact.NickName</td> *@
+                                                                <td>@contact.MobileNumber</td>
+                                                                <td>@contact.Email</td>
+                                                                <td>@GetTransferMethodText(contact)</td>
+                                                                <td>@contact.PreferredLanguage</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                         </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="float-right align-item-center mt-2">
-                            <button class="btn btn-primary px-4" @onclick="ShowAddModal">ADD</button>
-                        </div>
-
-                        <table class="table mb-0 mt-3" id="contactTable">
-                            <thead>
-                                <tr>
-                                    @* <th>ID</th> *@
-                                    <th>Name</th>
-                                    <th>Nick Name</th>
-                                    <th>Phone Number</th>
-                                    <th>Email</th>
-                                    <th>Send Transfers by</th>
-                                    <th>Preferred Language</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var contact in Contacts)
-                                {
-                                    <tr>
-                                        @* <td>@contact.Id</td> *@
-                                        <td>@contact.Name</td>
-                                        <td>@contact.NickName</td>
-                                        <td>@contact.MobileNumber</td>
-                                        <td>@contact.Email</td>
-                                        <td>@GetTransferMethodText(contact)</td>
-                                        <td>@contact.PreferredLanguage</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -80,14 +112,14 @@
 
 @if (ShowModal)
 {
-        <div class="modal show d-block" tabindex="-1" role="dialog" style="overflow-y: auto;">
+        <div class="modal show d-block" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Contact</h5>
                     <button type="button" class="close" @onclick="CloseModal"><span>&times;</span></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
                     <div class="form-group">
                             <label>Name <small class="text-danger font-13">*</small></label>
                         <input class="form-control @(SubmitAttempted && string.IsNullOrWhiteSpace(NewContact.Name) ? "is-invalid" : "")"
