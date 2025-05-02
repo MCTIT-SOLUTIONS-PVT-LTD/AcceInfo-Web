@@ -3,11 +3,13 @@
 @using System.Text
 @using Common.Models.Response
 @using Blazored.LocalStorage
+@using Microsoft.Extensions.Localization
 @layout LoginLayout
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject ILocalStorageService LocalStorage
+@inject IStringLocalizer<AcceInfo_Web.Pages.Login.Login> Localizer
 
 <style>
     .otp-container {
@@ -81,12 +83,12 @@
                     <div class="media">
                         <div class="media-body ml-3 align-self-center">
                             <img src="assets/images/logo-dark.png" height="35" alt="logo" class="my-3">
-                            <p class="text-muted mb-0">Sign in to continue to ACCEINFO.</p>
+                            <p class="text-muted mb-0">@Localizer["LoginLabel"]</p>
                         </div>
                     </div>
                     <form class="form-horizontal my-4" onsubmit="return false;">
                         <div class="form-group">
-                            <label for="username">Client Card or Username</label>
+                            <h3>@Localizer["UserNameText"]</h3>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="basic-addon1"><i class="mdi mdi-account-outline font-16"></i></span>
@@ -139,13 +141,13 @@
                                            id="customControlInline"
                                            @bind="RememberUsername" />
                                     <label class="custom-control-label" for="customControlInline">
-                                        Save client card or username
+                                        @Localizer["SaveDetailText"]
                                     </label>
                                 </div>
                             </div>
                             <div class="col-sm-6 text-right">
                                 <a href="#" class="text-muted font-13">
-                                    <i class="mdi mdi-lock"></i> Forgot your password?
+                                    <i class="mdi mdi-lock"></i>@Localizer["SigninText"]
                                 </a>
                             </div>
                         </div>
@@ -153,7 +155,7 @@
                         <div class="form-group mb-0 row">
                             <div class="col-12 mt-2">
                                 <button class="btn btn-primary btn-block waves-effect waves-light" type="submit" @onclick="HandleLogin">
-                                    Sign In <i class="fas fa-sign-in-alt ml-1"></i>
+                                    @Localizer["SigninText"]<i class="fas fa-sign-in-alt ml-1"></i>
                                 </button>
                                 @if (!string.IsNullOrWhiteSpace(LoginApiErrorMessage))
                                 {
@@ -220,10 +222,10 @@
         <div class="accountbg d-flex align-items-center">
             <div class="account-title text-white text-center">
                 <!-- <img src="assets/images/logo-dark.png" alt="" class="logo-lg"> -->
-                <h2 class="mt-3">Welcome to Acce<span style="color: #df1a22;">Info</span></h2>
+                <h2 class="mt-3">@Localizer["WelcomeText1"]<span style="color: #df1a22;">@Localizer["WelcomeText2"]</span></h2>
                 <div class="border w-25 mx-auto border-primary"></div>
-                <h1 class="">Let's Get Started</h1>
-                <p class="font-14 mt-3">Don't have an account ? <a href="" style="color: #df1a22;">Sign up</a></p>
+                <h1 class="">@Localizer["LetsGetStartedText"]</h1>
+                <p class="font-14 mt-3">@Localizer["DontHaveAccountText"] <a href="" style="color: #df1a22;">@Localizer["Signup"]</a></p>
 
             </div>
         </div>
