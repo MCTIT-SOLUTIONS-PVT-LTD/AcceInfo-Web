@@ -119,13 +119,14 @@
 
 
 <script>
-     window.initializeDataTable = () => {
-        setTimeout(() => {
-            if ($.fn.DataTable.isDataTable('#historyTable')) {
-                $('#historyTable').DataTable().destroy();
-            }
-            $('#historyTable').DataTable();
-        }, 200); // delay to ensure DOM is ready
+    window.clearDataTable = () => {
+        if ($.fn.DataTable.isDataTable('#historyTable')) {
+            $('#historyTable').DataTable().clear().destroy();
+        }
+    };
+
+    window.initializeDataTable = () => {
+        $('#historyTable').DataTable();
     };
 </script>
 
@@ -195,8 +196,8 @@
             var requestBody = new
             {
                 AccountId = SelectedAccountId,
-                // StartDate = FromDate.ToString("yyyy-MM-dd"),
-                // EndDate = ToDate.ToString("yyyy-MM-dd")
+                StartDate = FromDate.ToString("yyyy-MM-dd"),
+                EndDate = ToDate.ToString("yyyy-MM-dd")
             };
 
             var requestJson = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
@@ -220,11 +221,13 @@
                 if (result != null && result.Status == "Success" && result.Data != null)
                 {
                     Transactions = result.Data;
+                    await JS.InvokeVoidAsync("clearDataTable");
                     await JS.InvokeVoidAsync("initializeDataTable");
                 }
                 else
                 {
                     Transactions = [];
+                    await JS.InvokeVoidAsync("clearDataTable");
                     await JS.InvokeVoidAsync("initializeDataTable");
                 }
 

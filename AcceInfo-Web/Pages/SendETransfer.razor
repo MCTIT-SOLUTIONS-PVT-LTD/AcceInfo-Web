@@ -1,271 +1,470 @@
 ﻿@page "/send-e-transfer"
 @layout MainLayout
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IJSRuntime JS
+
+@using System.Text.Json
+@using System.Net.Http.Headers
+@using System.Text
+@using System.ComponentModel.DataAnnotations
+
+@if (IsLoading)
+{
+    <div class="spinner-overlay">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
 
 <div class="row">
-
     <SideNavSlider />
-
     <div class="col-lg-9">
         <div class="card">
-            <div class="card-body pt-225rem">
-                <div class="tab-content" id="profile-tabContent">
-                    <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
-                        <h3 class="text-primary"><u>Interac E-Transfer</u></h3>
-                        <br />
-                        <div class="single-pro-info-tab">
-                            <ul class="nav nav-pills mb-0 nav-justified" id="pills-tab" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="pay-with-acce-accounts-tab" data-toggle="pill" href="#pay-with-acce-accounts" aria-selected="true">Pay with ACCE Accounts</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="pay-with-acce-rewards-points-tab" data-toggle="pill" href="#pay-with-acce-rewards-points" aria-selected="false">Pay with Rewards Points</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <div class="tab-content mt-4" id="pills-tabContent">
-                                <div class="tab-pane fade show active" id="pay-with-acce-accounts">
+            <div class="card-body">
+                <div class="ribbon-1">
+                    <div class="ribbon-box">
+                        <h3><div class="ribbon ribbon-mark bg-primary">Interac E-Transfer</div></h3>
+
+                        @if (ShowConfirmation)
+                        {
+                            <div class="card border mt-4">
+                                <div class="card-body">
+                                    <h4 class="alert-heading font-18 text-primary">Transfer Details</h4>
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-5">Transfer From</dt>
+                                        <dd class="col-sm-7">@Accounts.FirstOrDefault(a => a.AccountId == Form.RequestFrom)?.AccountName</dd>
+
+                                        <dt class="col-sm-5">Amount</dt>
+                                        <dd class="col-sm-7">@($"{Form.Amount:C2}")</dd>
+
+                                        <dt class="col-sm-5">Transfer To</dt>
+                                        <dd class="col-sm-7">@Contacts.FirstOrDefault(c => c.AccountId == Form.DepositTo)?.Name</dd>
+
+                                        <dt class="col-sm-5">Invoice Number</dt>
+                                        <dd class="col-sm-7">@Form.InvoiceNumber</dd>
+
+                                        <dt class="col-sm-5">Request Due Date</dt>
+                                        <dd class="col-sm-7">@Form.DueDate?.ToString("MMM dd, yyyy")</dd>
+                                    </dl>
+
+                                    <hr />
+
+                                    <h4 class="alert-heading font-18 text-primary">Notification Details</h4>
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-5">Email</dt>
+                                        <dd class="col-sm-7">@Form.Email</dd>
+
+                                        <dt class="col-sm-5">Notify Recipient By</dt>
+                                        <dd class="col-sm-7">@Form.NotifyBy</dd>
+
+                                        <dt class="col-sm-5">Message</dt>
+                                        <dd class="col-sm-7">@Form.Message</dd>
+                                    </dl>
+
+                                    <div class="text-muted small mb-2">
+                                        <strong>Service Fee:</strong> Free for personal banking customers.
+                                    </div>
+
                                     <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <button class="btn btn-outline-primary w-100" @onclick="() => ShowConfirmation = false">Edit</button>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <button class="btn btn-primary w-100" @onclick="SubmitRequest">Request Now</button>
+                                        </div>
 
-                                        <div class="col-md-12 align-self-center">
-                                            <form class="mb-0">
-                                                <div class="row">
-                                                    <div class="col-md-9">
-                                                        <div class="form-group">
-                                                            <label>From <small class="text-danger font-13">*</small></label>
-                                                            <select class="form-control">
-                                                                <option>No Saeed! = $0.00 USD</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-9">
-                                                        <div class="form-group">
-                                                            <label>To <small class="text-danger font-13">*</small></label>
-                                                            <select class="form-control">
-                                                                <option>Select</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>Add new payee <small class="text-danger font-13">*</small></label>
-                                                            <div class="col-md-12">
-                                                                <div class="my-2">
-                                                                    <div class="radio radio-primary">
-                                                                        <input type="radio" name="radio" id="radio3" value="option3">
-                                                                        <label for="radio3">
-                                                                            Bill Payee
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="my-2">
-                                                                    <div class="radio radio-primary">
-                                                                        <input type="radio" name="radio" id="radio4" value="option4" checked>
-                                                                        <label for="radio4">
-                                                                            Interace-Transfer Recipient
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="my-2">
-                                                                    <div class="radio radio-primary">
-                                                                        <input type="radio" name="radio" id="radio5" value="option5">
-                                                                        <label for="radio5">
-                                                                            ACCE Customer Account
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-5">
-                                                        <div class="form-group">
-                                                            <label>Amount <small class="text-danger font-13">*</small></label>
-                                                            <div class="col-md-12">
-                                                                <div class="row">
-                                                                    <div class="input-daterange input-group" id="date-range">
-                                                                        <input type="text" name="amount" class="form-control col-md-8" placeholder="$0.00" id="amount" required="">
-                                                                        <select class="form-control">
-                                                                            <option>CAD</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row">
-                                                    <div class="col-md-5">
-                                                        <div class="form-group">
-                                                            <label class="col-form-label pt-0">How Often<small class="text-danger font-13">*</small></label>
-                                                            <select class="form-control">
-                                                                <option value="Once" selected>Once</option>
-                                                                <option value="Weekly">Weekly</option>
-                                                                <option value="Bi-Weekly">Bi-Weekly</option>
-                                                                <option value="Twice Monthly">Twice Monthly</option>
-                                                                <option value="Monthly">Monthly</option>
-                                                                <option value="Month End">Month End</option>
-                                                                <option value="Bi-Monthly">Bi-Monthly</option>
-                                                                <option value="Quarterly">Quarterly</option>
-                                                                <option value="Semi-Annually">Semi-Annually</option>
-                                                                <option value="Annually">Annually</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-
-                                                <div class="row">
-                                                    <div class="col-md-5">
-                                                        <div class="form-group">
-                                                            <label class="col-form-label pt-0">When <small class="text-danger font-13">*</small></label>
-                                                            <input class="form-control" type="date" value="2011-08-19" id="example-date-input">
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                            <button type="button" class="btn btn-outline-primary waves-effect waves-light btn-pd-left-right">Cancel</button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-6">
-                                                        <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-end">
-                                                            <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right">Next</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <br />
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="alert alert-outline-primary mb-0" role="alert">
-                                                            <h4 class="alert-heading font-18"><i class="fas fa-info-circle"></i> When are my transactions processed?</h4>
-                                                            <p>
-                                                                After you initiate an <em>Interac</em> e-Transfer, we will withdraw the chosen amount from the account selected and
-                                                                send an email or text message notification to the <em>Interac</em> e-Transfer recipient at the email address or mobile
-                                                                number that you provide. The email or text message notification will identify you as the sender and contain
-                                                                the <em>Interac</em> e-Transfer amount, the name of the <em>Interac</em> e-Transfer recipient, and that you are using
-                                                                <em>Interac</em> e-Transfer.
-                                                            </p>
-
-                                                            <p>
-                                                                An <em>Interac</em> e-Transfer recipient can claim or decline the <em>Interac</em> e-Transfer using Online and Mobile Banking,
-                                                                the online and mobile banking services of another financial institution.
-                                                            </p>
-
-                                                            <p>
-                                                                ACCE and other financial institutions participating in <em>Interac</em> e-Transfer, the owner of the <em>Interac</em> e-Transfer
-                                                                service, are entitled to pay an <em>Interac</em> e-Transfer to anyone who, in using Online or Mobile Banking, or the
-                                                                online or mobile banking service of another financial institution, claims the <em>Interac</em> e-Transfer and where
-                                                                applicable, correctly responds to the <em>Interac</em> e-Transfer question, whether you intended that person to receive
-                                                                the <em>Interac</em> e-Transfer or not.
-                                                            </p>
-
-                                                            <p>You are responsible for providing a correct and operational email address and/or mobile number for the transaction.</p>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </form>
-
-                                        </div><!--end col-->
-                                    </div><!--end row-->
-                                </div>
-                                <div class="tab-pane fade mt-4" id="pay-with-acce-rewards-points">
-                                    <div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade mt-4" id="pills-about-brand">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <img src="assets/images/products/2.jpg" alt="" height="150" class="d-block mx-auto">
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <span class="bg-soft-danger rounded-pill px-3 py-2 font-weight-bold">Frogetor</span>
-                                            <h5 class="mt-3">It is a long established fact that a reader will be distracted</h5>
-                                            <p class="text-muted mb-0">
-                                                There are many variations of passages of Lorem Ipsum available,
-                                                but the majority have suffered alteration in some form, by injected humour,
-                                                or randomised words which don't look even slightly believable.
-                                                If you are going to use a passage.
-                                            </p>
-                                        </div><!--end col-->
-                                        <div class="col-lg-4">
-                                            <ul class="list-unstyled">
-                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>It is a long established fact that a reader will be distracted.</li>
-                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>Contrary to popular belief, Lorem Ipsum is not text.</li>
-                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>There are many variations of passages of Lorem.</li>
-                                                <li class="mb-2 font-13 text-muted"><i class="mdi mdi-checkbox-marked-circle-outline text-success mr-2"></i>It is a long established fact that a reade.</li>
-                                            </ul>
-                                        </div><!--end col-->
-                                    </div><!--end row-->
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="alert alert-outline-primary mb-0" role="alert">
+                                        <h4 class="alert-heading font-18"><i class="fas fa-info-circle"></i> When are my transactions processed?</h4>
+                                        <p>
+                                            The funds will be deposited directly into your account once the request is fulfilled.<br />
+                                            You’re responsible for providing the correct recipient contact details. You must have the recipient’s permission to use them.
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="tab-pane fade mt-4" id="pills-custom">
-                                    <div class="row">
-                                        <div class="col-lg-4">
-                                            <div class="pro-order-box mb-2 mb-lg-0">
-                                                <i class="mdi mdi-white-balance-sunny text-warning"></i>
-                                                <h4 class="header-title">Seff from Sunlight</h4>
-                                                <p class="text-muted">
-                                                    Contrary to popular belief, Lorem Ipsum is.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <div class="pro-order-box mb-2 mb-lg-0">
-                                                <i class="mdi mdi-fire text-danger"></i>
-                                                <h4 class="header-title">Not Seff from Fire </h4>
-                                                <p class="text-muted">
-                                                    It is a long established fact that.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <div class="pro-order-box mb-2 mb-lg-0">
-                                                <i class="mdi mdi-glass-wine text-success"></i>
-                                                <h4 class="header-title">Seff from liqvid</h4>
-                                                <p class="text-muted">
-                                                    There are many variations of passages.
-                                                </p>
-                                            </div>
+                            </div>
+                        }
+                        else if (ShowSuccess)
+                        {
+                            <div class="card border-success shadow-sm mt-4">
+                                <div class="card-body">
+                                    <div class="text-center text-success">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <h5 class="font-weight-bold">Money Requested!</h5>
+                                        <p>@DateTime.Now.ToString("MMM dd, yyyy 'at' h:mm tt") ET</p>
+                                    </div>
+
+                                    <hr />
+
+                                    <h6 class="text-primary font-weight-bold"><u>Request Details</u></h6>
+                                    <dl class="row">
+
+                                        <dt class="col-sm-5">Transaction ID</dt>
+                                        <dd class="col-sm-7 text-success">@TransactionId</dd>
+
+                                        <dt class="col-sm-5">Transfer From</dt>
+                                        <dd class="col-sm-7">@Accounts.FirstOrDefault(a => a.AccountId == Form.RequestFrom)?.AccountName</dd>
+
+                                        <dt class="col-sm-5">Amount</dt>
+                                        <dd class="col-sm-7">@($"{Form.Amount:0.00}")</dd>
+
+                                        <dt class="col-sm-5">Transfer To</dt>
+                                        <dd class="col-sm-7">@Contacts.FirstOrDefault(c => c.AccountId == Form.DepositTo)?.AccountNumber</dd>
+
+                                        <dt class="col-sm-5">Registered Name</dt>
+                                        <dd class="col-sm-7 text-uppercase">@Contacts.FirstOrDefault(c => c.AccountId == Form.DepositTo)?.Name</dd>
+
+                                        <dt class="col-sm-5">Invoice Number</dt>
+                                        <dd class="col-sm-7">@Form.InvoiceNumber</dd>
+
+                                        <dt class="col-sm-5">Request Due Date</dt>
+                                        <dd class="col-sm-7">@Form.DueDate?.ToString("MMM dd, yyyy")</dd>
+                                    </dl>
+
+                                    <h6 class="text-primary font-weight-bold mt-4"><u>Notification Details</u></h6>
+                                    <dl class="row">
+                                        <dt class="col-sm-5">Email</dt>
+                                        <dd class="col-sm-7">@Form.Email</dd>
+
+                                        <dt class="col-sm-5">Notify Recipient By</dt>
+                                        <dd class="col-sm-7">@Form.NotifyBy</dd>
+
+                                        <dt class="col-sm-5">Message</dt>
+                                        <dd class="col-sm-7">@Form.Message</dd>
+                                    </dl>
+
+                                    <div class="row justify-content-center mt-4">
+                                        <div class="col-md-4">
+                                            <button class="btn btn-primary w-100" @onclick="DoneClicked">Finish</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div><!--end tab-pane-->
+                        }
+                        else
+                        {
+                            <EditForm EditContext="editContext">
+                                <DataAnnotationsValidator />
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Transfer from</label>
+                                            <select class="form-control" @bind="Form.RequestFrom">
+                                                <option value="">Select</option>
+                                                @foreach (var account in Accounts)
+                                                {
+                                                    <option value="@account.AccountId">@($"{account.AccountName} - {account.AccountNumber} = {account.Balance:C}")</option>
+                                                }
+                                            </select>
+                                            @if (ShowValidation && string.IsNullOrWhiteSpace(Form.RequestFrom))
+                                            {
+                                                <div class="text-danger">Please select the account to request from.</div>
+                                            }
+                                        </div>
+                                    </div>
 
-                    <div class="tab-pane fade" id="request-money">
-                        <h4 class="mt-0 header-title mb-3">Request Money</h4>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Transfer to</label>
+                                            <select class="form-control" @bind="Form.DepositTo">
+                                                <option value="">Select</option>
+                                                @foreach (var contact in Contacts)
+                                                {
+                                                    <option value="@contact.AccountId">@($"{contact.Name ?? contact.NickName} - {contact.AccountNumber}")</option>
+                                                }
+                                            </select>
+                                            @if (ShowValidation && string.IsNullOrWhiteSpace(Form.DepositTo))
+                                            {
+                                                <div class="text-danger">Please select the recipient account.</div>
+                                            }
+                                            <button type="button" class="btn btn-outline-primary btn-sm mt-2 float-right">+ Add payee</button>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    </div><!--end tab-pane-->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Amount</label>
+                                            <InputNumber class="form-control" @bind-Value="Form.Amount" />
+                                            @if (ShowValidation && (!Form.Amount.HasValue || Form.Amount <= 0))
+                                            {
+                                                <div class="text-danger">Please enter an amount greater than 0.</div>
+                                            }
+                                        </div>
+                                    </div>
 
-                    <div class="tab-pane fade" id="cancel-bill-payment">
-                        <h4 class="mt-0 header-title mb-3">Cancel Bill Payment</h4>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Currency</label>
+                                            <select class="form-control" @bind="Form.Currency">
+                                                <option value="CAD">CAD</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    </div><!--end tab-pen-->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Due date</label>
+                                            <InputDate class="form-control" @bind-Value="Form.DueDate" />
+                                            @if (ShowValidation && !Form.DueDate.HasValue)
+                                            {
+                                                <div class="text-danger">Please select a due date.</div>
+                                            }
+                                        </div>
+                                    </div>
 
-                    <div class="tab-pane fade" id="pay-multiple-bills">
-                        <h4 class="mt-0 header-title mb-3">Pay Multiple Bills</h4>
-                        <div class="row">
-                            <div class="col-lg-12">
-                            </div> <!--end col-->
-                        </div><!--end row-->
-                    </div><!--end tab-pane-->
-                </div>  <!--end tab-content-->
-            </div><!--end card-body-->
-        </div><!--end card-->
-    </div><!--end col-->
-</div><!--end row-->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <InputText class="form-control" @bind-Value="Form.Email" />
+                                            @if (ShowValidation && string.IsNullOrWhiteSpace(Form.Email))
+                                            {
+                                                <div class="text-danger">Please enter an email address.</div>
+                                            }
+                                            else if (ShowValidation && !new EmailAddressAttribute().IsValid(Form.Email))
+                                            {
+                                                <div class="text-danger">Invalid email format.</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <!-- Notify Recipient By -->
+                                        <div class="form-group">
+                                            <label>Notify Recipient By</label>
+                                            <select class="form-control" @bind="Form.NotifyBy">
+                                                <option value="">Select</option>
+                                                <option>Email</option>
+                                                <option>Phone</option>
+                                            </select>
+                                            @if (ShowValidation && string.IsNullOrWhiteSpace(Form.NotifyBy))
+                                            {
+                                                <div class="text-danger">Please select how to notify the recipient.</div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <!-- Invoice Number -->
+                                        <div class="form-group">
+                                            <label for="invoiceNumber">Invoice number (optional)</label>
+                                            <InputText class="form-control" id="invoiceNumber" placeholder="Invoice number" @bind-Value="Form.InvoiceNumber" />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Message</label>
+                                            <InputTextArea class="form-control" @bind-Value="Form.Message" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-end">
+                                    <div class="col-md-3">
+                                        <button type="reset" class="btn btn-outline-primary w-100" @onclick="ClearForm">Clear</button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-primary w-100" @onclick="ValidateAndConfirm">Continue</button>
+                                    </div>
+                                </div>
+
+                                <br />
+                                <div class="row justify-content-center">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-outline-primary mb-0" role="alert">
+                                            <strong>Service Fee:</strong> Free for personal banking customers.
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </EditForm>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @code {
+    private List<AccountModel> Accounts = new();
+    private List<ContactModel> Contacts = new();
+    private string AuthToken = "";
+    private string ContactId = "";
+    private bool IsLoading = false;
+    private bool ShowConfirmation = false;
+    private bool ShowSuccess = false;
+    private string TransactionId = "";
 
+    private RequestForm Form = new();
+    private EditContext editContext;
+    private ValidationMessageStore messageStore;
+
+    private bool ShowValidation = false;
+
+    private void ValidateAndConfirm()
+    {
+        ShowValidation = true;
+
+        bool isValid =
+            !string.IsNullOrWhiteSpace(Form.RequestFrom) &&
+            !string.IsNullOrWhiteSpace(Form.DepositTo) &&
+            Form.Amount.HasValue && Form.Amount > 0 &&
+            Form.DueDate.HasValue &&
+            !string.IsNullOrWhiteSpace(Form.Email) &&
+            new EmailAddressAttribute().IsValid(Form.Email) &&
+            !string.IsNullOrWhiteSpace(Form.NotifyBy);
+
+        if (isValid)
+        {
+            ShowConfirmation = true;
+            ShowValidation = false;
+        }
+    }
+
+
+    private void ClearForm()
+    {
+        Form = new RequestForm(); // reinitializes the form
+        ShowConfirmation = false;
+        ShowSuccess = false;
+        StateHasChanged(); // triggers UI update
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthToken = await LocalStorage.GetItemAsync<string>("auth_token") ?? "";
+        ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? "";
+
+        Form = new RequestForm();
+        editContext = new EditContext(Form);
+        messageStore = new ValidationMessageStore(editContext);
+
+        editContext.OnFieldChanged += (sender, args) =>
+        {
+            messageStore.Clear(args.FieldIdentifier);
+            editContext.NotifyValidationStateChanged();
+        };
+
+        await FetchAccounts();
+        await LoadContacts();
+    }
+
+
+
+    private async void SubmitRequest()
+    {
+        IsLoading = true; // Show spinner
+        StateHasChanged(); // Refresh UI
+
+        await Task.Delay(3000); // Wait for 3 seconds
+
+        TransactionId = $"REQ-{DateTime.Now:yyyyMMddHHmmss}";
+        ShowSuccess = true;
+        ShowConfirmation = false;
+        IsLoading = false; // Hide spinner
+
+        StateHasChanged(); // Refresh UI after update
+    }
+
+    private void DoneClicked()
+    {
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+    }
+
+    public class RequestForm
+    {
+        [Required] public string RequestFrom { get; set; }
+        [Required] public string DepositTo { get; set; }
+        [Required, Range(0.01, double.MaxValue)] public decimal? Amount { get; set; }
+        [Required] public string Currency { get; set; } = "CAD";
+        [Required] public DateTime? DueDate { get; set; }
+        [Required, EmailAddress] public string Email { get; set; }
+        public string Message { get; set; }
+        [Required] public bool ConsentGiven { get; set; }
+        [Required] public string NotifyBy { get; set; }
+        public string InvoiceNumber { get; set; }
+    }
+
+    public class AccountModel
+    {
+        public string AccountId { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNumber { get; set; }
+        public decimal Balance { get; set; }
+    }
+
+    public class ContactModel
+    {
+        public string AccountId { get; set; }
+        public string AccountNumber { get; set; }
+        public string Name { get; set; }
+        public string NickName { get; set; }
+    }
+
+    public class ApiResponse<T>
+    {
+        public string Status { get; set; }
+        public T Data { get; set; }
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+    }
+
+    private async Task FetchAccounts()
+    {
+        IsLoading = true;
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/accounts/cust-account?ContactId={ContactId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<AccountModel>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (result?.Status == "Success")
+                    Accounts = result.Data;
+            }
+        }
+        finally { IsLoading = false; }
+    }
+
+    private async Task LoadContacts()
+    {
+        IsLoading = true;
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://acceinfoapi-cga0hmcdazb5hjbs.eastus2-01.azurewebsites.net/api/member/get-list");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<ContactModel>>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (result?.Status == "Success")
+                    Contacts = result.Data;
+            }
+        }
+        finally { IsLoading = false; }
+    }
 }
