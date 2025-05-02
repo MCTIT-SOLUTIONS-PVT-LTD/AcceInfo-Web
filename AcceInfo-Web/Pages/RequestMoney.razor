@@ -156,7 +156,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Request from</label>
+                                            <label>Request from <small class="text-danger font-13">*</small></label>
                                             <select class="form-control" @bind="Form.RequestFrom">
                                                 <option value="">Select</option>
                                                 @foreach (var account in Accounts)
@@ -173,7 +173,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Deposit to</label>
+                                            <label>Deposit to <small class="text-danger font-13">*</small></label>
                                             <select class="form-control" @bind="Form.DepositTo">
                                                 <option value="">Select</option>
                                                 @foreach (var contact in Contacts)
@@ -193,7 +193,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Amount</label>
+                                            <label>Amount <small class="text-danger font-13">*</small></label>
                                             <InputNumber class="form-control" @bind-Value="Form.Amount" />
                                             @if (ShowValidation && (!Form.Amount.HasValue || Form.Amount <= 0))
                                             {
@@ -215,7 +215,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Due date</label>
+                                            <label>Due date <small class="text-danger font-13">*</small></label>
                                             <InputDate class="form-control" @bind-Value="Form.DueDate" />
                                             @if (ShowValidation && !Form.DueDate.HasValue)
                                             {
@@ -226,7 +226,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Email</label>
+                                            <label>Email <small class="text-danger font-13">*</small></label>
                                             <InputText class="form-control" @bind-Value="Form.Email" />
                                             @if (ShowValidation && string.IsNullOrWhiteSpace(Form.Email))
                                             {
@@ -244,7 +244,7 @@
                                     <div class="col-md-6">
                                         <!-- Notify Recipient By -->
                                         <div class="form-group">
-                                            <label>Notify Recipient By</label>
+                                            <label>Notify Recipient By <small class="text-danger font-13">*</small></label>
                                             <select class="form-control" @bind="Form.NotifyBy">
                                                 <option value="">Select</option>
                                                 <option>Email</option>
@@ -276,12 +276,16 @@
                                     </div>
                                 </div>
 
-                                <div class="row justify-content-end">
-                                    <div class="col-md-3">
-                                        <button type="reset" class="btn btn-outline-primary w-100" @onclick="ClearForm">Clear</button>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
+                                            <button type="reset" class="btn btn-outline-primary waves-effect waves-light btn-pd-left-right" @onclick="ClearForm">Clear</button>
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <button type="button" class="btn btn-primary w-100" @onclick="ValidateAndConfirm">Continue</button>
+                                    <div class="col-6">
+                                        <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-end">
+                                            <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right" @onclick="ValidateAndConfirm">Continue</button>
+                                        </div>
                                     </div>
                                 </div>
 

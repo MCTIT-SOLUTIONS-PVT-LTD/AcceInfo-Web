@@ -56,54 +56,59 @@
 
                                                 @if (ShowSuccessMessage)
                                                 {
-                                                    <div class="card border border-primary shadow-sm">
-                                                        <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5></div>
+                                                    <div class="card border-success shadow-sm mt-4">
                                                         <div class="card-body">
-                                                            <p class="text-success">Your Transfer Money has been paid successfully. Below is a summary of the transaction.</p>
-                                                            <dl class="row mb-0">
-                                                                <dt class="col-sm-4">Transfer From:</dt>
-                                                                <dd class="col-sm-8">@SelectedFromSummary</dd>
+                                                            <div class="text-center text-success">
+                                                                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                                                <h5 class="font-weight-bold">Transfer Money Successful!</h5>
+                                                                <p>@DateTime.Now.ToString("MMM dd, yyyy 'at' h:mm tt") ET</p>
+                                                            </div>
 
-                                                                <dt class="col-sm-4">Transfer To:</dt>
-                                                                <dd class="col-sm-8">@SelectedToSummary</dd>
+                                                            <hr />
 
-                                                                <dt class="col-sm-4">Amount:</dt>
-                                                                <dd class="col-sm-8">@($"{decimal.Parse(Model.Amount):C2}")</dd>
+                                                            <h6 class="text-primary font-weight-bold"><u>Transfer Money Details</u></h6>
+                                                            <dl class="row">
 
-                                                                <dt class="col-sm-4">Currency:</dt>
-                                                                <dd class="col-sm-8">CAD</dd>
+                                                                <dt class="col-sm-5">Transaction ID:</dt>
+                                                                <dd class="col-sm-7 text-success">@TransactionNumber</dd>
 
-                                                                <dt class="col-sm-4">Frequency:</dt>
-                                                                <dd class="col-sm-8">@Model.Frequency</dd>
+                                                                <dt class="col-sm-5">Transfer From:</dt>
+                                                                <dd class="col-sm-7">@SelectedFromSummary</dd>
+
+                                                                <dt class="col-sm-5">Transfer To:</dt>
+                                                                <dd class="col-sm-7">@SelectedToSummary</dd>
+
+                                                                <dt class="col-sm-5">Amount:</dt>
+                                                                <dd class="col-sm-7">@($"{decimal.Parse(Model.Amount):C2}")</dd>
+
+                                                                <dt class="col-sm-5">Currency:</dt>
+                                                                <dd class="col-sm-7">CAD</dd>
+
+                                                                <dt class="col-sm-5">Frequency:</dt>
+                                                                <dd class="col-sm-7">@Model.Frequency</dd>
 
                                                                 @if (Model.Frequency == "Once")
                                                                 {
-                                                                    <dt class="col-sm-4">Transfer Date:</dt>
-                                                                    <dd class="col-sm-8">@Model.Date?.ToString("MMMM dd, yyyy")</dd>
+                                                                    <dt class="col-sm-5">Transfer Date:</dt>
+                                                                    <dd class="col-sm-7">@Model.Date?.ToString("MMMM dd, yyyy")</dd>
                                                                 }
                                                                 else
                                                                 {
-                                                                    <dt class="col-sm-4">Start Date:</dt>
-                                                                    <dd class="col-sm-8">@Model.StartDate?.ToString("MMMM dd, yyyy")</dd>
+                                                                    <dt class="col-sm-5">Start Date:</dt>
+                                                                    <dd class="col-sm-7">@Model.StartDate?.ToString("MMMM dd, yyyy")</dd>
 
-                                                                    <dt class="col-sm-4">End Date:</dt>
-                                                                    <dd class="col-sm-8">@Model.EndDate?.ToString("MMMM dd, yyyy")</dd>
+                                                                    <dt class="col-sm-5">End Date:</dt>
+                                                                    <dd class="col-sm-7">@Model.EndDate?.ToString("MMMM dd, yyyy")</dd>
                                                                 }
 
-                                                                <dt class="col-sm-4">Memo:</dt>
-                                                                <dd class="col-sm-8">@Model.Memo</dd>
+                                                                <dt class="col-sm-5">Memo:</dt>
+                                                                <dd class="col-sm-7">@Model.Memo</dd>
 
-                                                                <dt class="col-sm-4">Transaction Number:</dt>
-                                                                <dd class="col-sm-8">@TransactionNumber</dd>
                                                             </dl>
 
-                                                            <div class="text-right mt-3">
-                                                                <div class="row justify-content-end">
-                                                                    <div class="col-md-3">
-                                                                        <button class="btn btn-outline-primary w-100" @onclick="@(() => NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true))">
-                                                                            <i class="fas fa-check-circle"></i> Done
-                                                                        </button>
-                                                                    </div>
+                                                            <div class="row justify-content-center mt-4">
+                                                                <div class="col-md-4">
+                                                                    <button class="btn btn-primary w-100" @onclick="@(() => NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true))">Finish</button>
                                                                 </div>
                                                             </div>
                                                         </div>
