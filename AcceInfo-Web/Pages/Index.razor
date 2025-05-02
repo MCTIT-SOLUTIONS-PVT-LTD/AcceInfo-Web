@@ -1,12 +1,14 @@
 ﻿@page "/"
 @using Blazored.LocalStorage
 @using System.Text.Json
+@using Microsoft.Extensions.Localization
 @layout MainLayout
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService LocalStorage
 @inject HttpClient Http
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject IJSRuntime JS
+@inject IStringLocalizer<AcceInfo_Web.Pages.Index> Localizer
 
 @* change *@
 @* @using Blazored.LocalStorage
@@ -90,7 +92,8 @@
                                             </div> -->
                                             <div class="fro_profile_user-detail mt-4">
                                                 <h4 class="fro_user-name text-primary">Good Morning,</h4>
-                                            <h5 class="fro_user-name text-primary">Welcome, @FirstName  @LastName</h5>
+                                            <h5>@(Localizer["WelcomeText"].ResourceNotFound ? "Missing" : Localizer["WelcomeText"])</h5>
+                                            <h5 class="fro_user-name text-primary">@($"{Localizer["WelcomeText"]}, {FirstName} {LastName}")</h5>
                                                 <a href="#" class="mb-0 fro_user-name-post text-primary">Go to ACCE Business Banking</a>
                                             </div>
                                         </div>
