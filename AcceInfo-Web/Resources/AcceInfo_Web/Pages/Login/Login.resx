@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AcceInfoTokenText" xml:space="preserve">
+    <value>ACCE Token</value>
+  </data>
   <data name="DontHaveAccountText" xml:space="preserve">
     <value>Don't have an account ?</value>
   </data>
@@ -141,6 +144,12 @@
   <data name="Signup" xml:space="preserve">
     <value>Sign up</value>
   </data>
+  <data name="EnterValueTokenText" xml:space="preserve">
+    <value>Please enter the value from your Secure Token</value>
+  </data>
+  <data name="TokenText" xml:space="preserve">
+    <value>If you use the Entrust IdentityGuard Mobile app, you can copy and paste the token number into the RBC Caribbean app.</value>
+  </data>
   <data name="UserNameText" xml:space="preserve">
     <value>Client Card or Username</value>
   </data>
@@ -149,5 +158,17 @@
   </data>
   <data name="WelcomeText2" xml:space="preserve">
     <value>Info</value>
+  </data>
+  <data name="ContinueText" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="RememberItText" xml:space="preserve">
+    <value>Remember It?</value>
+  </data>
+  <data name="SingInNowText" xml:space="preserve">
+    <value>Sign In ACCE Now</value>
+  </data>
+  <data name="SignInhereText" xml:space="preserve">
+    <value>Sign In here</value>
   </data>
 </root>

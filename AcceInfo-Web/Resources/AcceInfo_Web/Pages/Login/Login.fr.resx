@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AcceInfoTokenText" xml:space="preserve">
+    <value>Jeton ACCE</value>
+  </data>
   <data name="DontHaveAccountText" xml:space="preserve">
     <value>Vous n'avez pas de compte ? </value>
   </data>
@@ -141,6 +144,12 @@
   <data name="Signup" xml:space="preserve">
     <value>S'inscrire</value>
   </data>
+  <data name="EnterValueTokenText" xml:space="preserve">
+    <value>Veuillez saisir la valeur de votre jeton sécurisé</value>
+  </data>
+  <data name="TokenText" xml:space="preserve">
+    <value>Si vous utilisez l’application mobile Entrust IdentityGuard, vous pouvez copier et coller le numéro de jeton dans l’application RBC Caribbean.</value>
+  </data>
   <data name="UserNameText" xml:space="preserve">
     <value>Carte client ou nom d'utilisateur</value>
   </data>
@@ -149,5 +158,17 @@
   </data>
   <data name="WelcomeText2" xml:space="preserve">
     <value>Informations</value>
+  </data>
+  <data name="ContinueText" xml:space="preserve">
+    <value>Continuer</value>
+  </data>
+  <data name="RememberItText" xml:space="preserve">
+    <value>Vous vous en souvenez ?</value>
+  </data>
+  <data name="SingInNowText" xml:space="preserve">
+    <value>Connectez-vous à ACCE maintenant</value>
+  </data>
+  <data name="SignInhereText" xml:space="preserve">
+    <value>Connectez-vous ici</value>
   </data>
 </root>
