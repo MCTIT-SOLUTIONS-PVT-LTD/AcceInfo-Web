@@ -113,7 +113,7 @@
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-md-6">
-                                                            <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2 " id="addContactBtn" @onclick="ShowModal">+ Add payee</button>
+                                                            <button type="button" class="btn btn-outline-primary waves-effect waves-light mb-2 " @onclick="ShowAddModal">+ Add payee</button>
 
                                                         </div>
                                                         <div class="col-md-6">
@@ -178,11 +178,14 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="col-md-1">
-                                                                                    <button type="button" class="btn btn-danger btn-sm float-right" @onclick="() => RemovePayeeRow(index)">
-                                                                                        <i class="fas fa-trash-alt"></i>
-                                                                                    </button>
-                                                                                </div>
+                                                                                @if (index >= 2) 
+                                                                                {
+                                                                                    <div class="col-md-1">
+                                                                                        <button type="button" class="btn btn-danger btn-sm float-right" @onclick="() => RemovePayeeRow(index)">
+                                                                                            <i class="fas fa-trash-alt"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                }
                                                                             </div>
                                                                         }
 
@@ -281,54 +284,57 @@
 
 
 <!-- MODAL -->
-<div class="modal fade" id="editor-modal" tabindex="-1" role="dialog" aria-labelledby="editor-title" style="overflow-y: auto;">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content form-horizontal">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editor-title">Add Payee</h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <div class="col-sm-12 mb-3">
-                    <label>Payee Name <small class="text-danger font-13">*</small></label>
-                    <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
-                    @if (ShowPayeeNameError)
-                    {
-                        <div class="text-danger">Payee Name is required.</div>
-                    }
+@if (ShowModal)
+{
+    <div class="modal show d-block" tabindex="-1" role="dialog" style="overflow-y: auto;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content form-horizontal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editor-title">Add Payee</h5>
+                    <button type="button" class="close" @onclick="CloseModal"><span>&times;</span></button>
                 </div>
-
-                <div class="col-sm-12 mb-3">
-                    <label>Payee Type <small class="text-danger font-13">*</small></label>
-                    <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
-                        <option value="">-- Select --</option>
-                        @foreach (var category in payeeCategories)
+                <div class="modal-body">
+                    <div class="col-sm-12 mb-3">
+                        <label>Payee Name <small class="text-danger font-13">*</small></label>
+                        <input type="text" class="form-control" @bind="newPayee.PayeeName" @oninput="(e) => ShowPayeeNameError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                        @if (ShowPayeeNameError)
                         {
-                            <option value="@category.PayeeTypeId">@category.Name</option>
+                            <div class="text-danger">Payee Name is required.</div>
                         }
-                    </select>
-                    @if (ShowPayeeTypeError)
-                    {
-                        <div class="text-danger">Payee Type is required.</div>
-                    }
-                </div>
+                    </div>
 
-                <div class="col-sm-12 mb-3">
-                    <label>Account Number <small class="text-danger font-13">*</small></label>
-                    <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
-                    @if (ShowPayeeNumberError)
-                    {
-                        <div class="text-danger">Account Number is required.</div>
-                    }
+                    <div class="col-sm-12 mb-3">
+                        <label>Payee Type <small class="text-danger font-13">*</small></label>
+                        <select class="form-control" @bind="PayeeTypeProxy" @bind:event="onchange">
+                            <option value="">-- Select --</option>
+                            @foreach (var category in payeeCategories)
+                            {
+                                <option value="@category.PayeeTypeId">@category.Name</option>
+                            }
+                        </select>
+                        @if (ShowPayeeTypeError)
+                        {
+                            <div class="text-danger">Payee Type is required.</div>
+                        }
+                    </div>
+
+                    <div class="col-sm-12 mb-3">
+                        <label>Account Number <small class="text-danger font-13">*</small></label>
+                        <input type="text" class="form-control" @bind="newPayee.PayeeNumber" @oninput="(e) => ShowPayeeNumberError = string.IsNullOrWhiteSpace(e.Value?.ToString())" />
+                        @if (ShowPayeeNumberError)
+                        {
+                            <div class="text-danger">Account Number is required.</div>
+                        }
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" @onclick="HandlePayeeSubmit">Save</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="HandlePayeeSubmit">Save</button>
+                    <button type="button" class="btn btn-danger" @onclick="CloseModal">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
 
 
 <!-- Toast -->
@@ -380,12 +386,6 @@
     $('#customToast').toast('show');
     };
 
-    function hideModal(modalId) {
-    $('#' + modalId).modal('hide');
-    }
-    function showModal(modalId) {
-    $('#' + modalId).modal('show');
-    }
 </script>
 
 @code {
@@ -399,6 +399,7 @@
     private string AuthToken = "";
     private bool ShowConfirmation = false;
     private bool ShowSuccessMessage = false;
+    private bool ShowModal = false;
 
     private List<string> TransactionNumbers = new();
 
@@ -748,7 +749,7 @@
 
                 newPayee = new PayeeAddRequest();
                 await LoadPayees();
-                await JSRuntime.InvokeVoidAsync("hideModal", "editor-modal");
+                CloseModal();
             }
             else
             {
@@ -769,8 +770,10 @@
         }
     }
 
-    private async Task ShowModal()
+    private void CloseModal()
     {
-        await JSRuntime.InvokeVoidAsync("showModal", "editor-modal");
+        ShowModal = false;
     }
+
+    private void ShowAddModal() => ShowModal = true;
 }

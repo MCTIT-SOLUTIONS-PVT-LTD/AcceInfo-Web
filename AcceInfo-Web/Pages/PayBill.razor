@@ -168,7 +168,7 @@
                                                                                     <option value="@payee.PayeeId">@payee.PayeeName - @payee.PayeeTypeName - @payee.PayeeNumber</option>
                                                                                 }
                                                                             </select>
-                                                                            <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn" @onclick="ShowAddModal">+ Add payee</button>
+                                                                            <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" @onclick="ShowAddModal">+ Add payee</button>
                                                                             <ValidationMessage For="@(() => Model.PayeeId)" class="text-danger" />
                                                                         </div>
                                                                     </div>
@@ -412,6 +412,12 @@
     {
         AuthToken = await LocalStorage.GetItemAsync<string>("auth_token") ?? "";
         ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? "";
+
+        var today = DateTime.Today;
+        Model.Date = today;
+        Model.StartDate = today;
+        Model.EndDate = today;
+
         await FetchAccounts();
         await LoadPayees();
         await LoadPayeeCategories();

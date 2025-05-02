@@ -1,170 +1,189 @@
 ﻿@page "/send-money"
 @layout MainLayout
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
+
+@using System.ComponentModel.DataAnnotations
+
+@if (IsLoading)
+{
+    <div class="spinner-overlay">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
 
 <div class="row">
-
     <SideNavSlider />
-
     <div class="col-lg-9">
         <div class="card">
             <div class="card-body">
-                <div class="tab-content" id="profile-tabContent">
-                    <div class="tab-pane fade show active" id="pay-bills-and-transfer-funds">
-                        <h3 class="text-primary"><u>Send money</u></h3>
-                        <!-- Modal (Keep the same modal, just update the body content) -->
-                        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Transfer Summary</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
+                <div class="ribbon-1">
+                    <div class="ribbon-box">
+                        <h3><div class="ribbon ribbon-mark bg-primary">Send Money</div></h3>
 
-                                        <p id="summaryContent">Loading...</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary">Confirm Transfer</button>
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        @if (ShowConfirmation)
+                        {
+                            <div class="card border mt-4">
+                                <div class="card-body">
+                                    <h5 class="text-primary font-weight-bold">Transfer Summary</h5>
+                                    <dl class="row">
+                                        <dt class="col-sm-5">Transfer From</dt>
+                                        <dd class="col-sm-7">@Form.TransferFrom</dd>
+
+                                        <dt class="col-sm-5">Send To</dt>
+                                        <dd class="col-sm-7">@Form.TransferTo</dd>
+
+                                        <dt class="col-sm-5">Amount</dt>
+                                        <dd class="col-sm-7">@($"{Form.Amount:C2}")</dd>
+
+                                        <dt class="col-sm-5">Currency</dt>
+                                        <dd class="col-sm-7">@Form.Currency</dd>
+
+                                        <dt class="col-sm-5">Message</dt>
+                                        <dd class="col-sm-7">@Form.Message</dd>
+                                    </dl>
+
+                                    <div class="row mt-4">
+                                        <div class="col-md-6 mb-2">
+                                            <button class="btn btn-primary w-100" @onclick="SubmitTransfer">Confirm Transfer</button>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <button class="btn btn-outline-primary w-100" @onclick="() => ShowConfirmation = false">Edit</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- /.modal -->
-                        <br />
-
-                        <div class="row">
-
-                            <div class="col-md-12">
-                                <div class="row justify-content-center">
-                                    <div class="col-md-9">
-                                        <form id="my-acccount-form" class="mb-0">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label for="requestFrom">Transfer from</label>
-                                                        <select class="form-control" id="requestFrom">
-                                                            <option>Select</option>
-                                                            <option>Chequing-100108226953 = $51,538.78</option>
-                                                            <option>Savings-100108226953 = $51,538.78</option>
-                                                        </select>
-                                                        <button type="button" class="btn btn-outline-primary btn-sm  mt-2  float-right" id="addContactBtn">+ Add payee</button>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label>Send To <small class="text-danger font-13">*</small></label>
-                                                        <select class="form-control" name="transferTo">
-                                                            <option>Select</option>
-                                                            <option>Savings-100108226953 = $51,538.78</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Amount <small class="text-danger font-13">*</small></label>
-                                                        <input type="text" name="amount" class="form-control" placeholder="$0.00" id="amount">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Currency</label>
-                                                        <select class="form-control" name="currency">
-                                                            <option>CAD</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label class="col-form-label pt-0">Message</label>
-                                                        <input class="form-control" type="text" id="memo">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row justify-content-end">
-                                                <div class="col-md-3">
-                                                    <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                        <button type="reset" class="btn btn-outline-primary waves-effect waves-light btn-pd-left-right w-100">Clear</button>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="btn-toolbar sw-toolbar sw-toolbar-bottom justify-content-start">
-                                                        <button type="button" class="btn btn-primary waves-effect waves-light btn-pd-left-right w-100" data-toggle="modal" data-animation="bounce" data-target=".bs-example-modal-lg" id="openSummaryModal">Continue</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <br />
-
-                                        </form>
+                        }
+                        else if (ShowSuccess)
+                        {
+                            <div class="card border-success shadow-sm mt-4">
+                                <div class="card-body text-center text-success">
+                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                    <h5 class="font-weight-bold">Transfer Successful!</h5>
+                                    <p><strong>Transaction ID:</strong> @TransactionId</p>
+                                    <p class="mb-1">Transfer From: <strong>@Form.TransferFrom</strong></p>
+                                    <p class="mb-1">To: <strong>@Form.TransferTo</strong></p>
+                                    <p class="mb-1">Amount: <strong>@Form.Amount @Form.Currency</strong></p>
+                                    <p class="mb-3">Message: <em>@Form.Message</em></p>
+                                    <button class="btn btn-primary" @onclick="() => NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true)">Finish</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <EditForm Model="Form" OnValidSubmit="ValidateAndShowSummary">
+                                <DataAnnotationsValidator />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Transfer from</label>
+                                            <InputText class="form-control" @bind-Value="Form.TransferFrom" />
+                                            <ValidationMessage For="@(() => Form.TransferFrom)" class="text-danger" />
+                                        </div>
                                     </div>
-                                    <div class="row single-pro-info-tab" style="border:none;">
-                                        <div class="col-md-12">
-                                            <div class="alert alert-outline-primary mb-0" role="alert">
-                                                <h4 class="alert-heading font-18"><i class="fas fa-info-circle"></i> When are my transactions processed?</h4>
-                                                <p>
-                                                    After you initiate an <em>Interac</em> e-Transfer, we will withdraw the chosen amount from the account selected and
-                                                    send an email or text message notification to the <em>Interac</em> e-Transfer recipient at the email address or mobile
-                                                    number that you provide. The email or text message notification will identify you as the sender and contain
-                                                    the <em>Interac</em> e-Transfer amount, the name of the <em>Interac</em> e-Transfer recipient, and that you are using
-                                                    <em>Interac</em> e-Transfer.
-                                                </p>
 
-                                                <p>
-                                                    An <em>Interac</em> e-Transfer recipient can claim or decline the <em>Interac</em> e-Transfer using Online and Mobile Banking,
-                                                    the online and mobile banking services of another financial institution.
-                                                </p>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Send To</label>
+                                            <InputText class="form-control" @bind-Value="Form.TransferTo" />
+                                            <ValidationMessage For="@(() => Form.TransferTo)" class="text-danger" />
+                                        </div>
+                                    </div>
 
-                                                <p>
-                                                    ACCE and other financial institutions participating in <em>Interac</em> e-Transfer, the owner of the <em>Interac</em> e-Transfer
-                                                    service, are entitled to pay an <em>Interac</em> e-Transfer to anyone who, in using Online or Mobile Banking, or the
-                                                    online or mobile banking service of another financial institution, claims the <em>Interac</em> e-Transfer and where
-                                                    applicable, correctly responds to the <em>Interac</em> e-Transfer question, whether you intended that person to receive
-                                                    the <em>Interac</em> e-Transfer or not.
-                                                </p>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Amount</label>
+                                            <InputNumber class="form-control" @bind-Value="Form.Amount" />
+                                            <ValidationMessage For="@(() => Form.Amount)" class="text-danger" />
+                                        </div>
+                                    </div>
 
-                                                <p>You are responsible for providing a correct and operational email address and/or mobile number for the transaction.</p>
-                                            </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Currency</label>
+                                            <select class="form-control" @bind="Form.Currency">
+                                                <option value="CAD">CAD</option>
+                                                <option value="USD">USD</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Message</label>
+                                            <InputText class="form-control" @bind-Value="Form.Message" />
                                         </div>
                                     </div>
                                 </div>
 
+                                <div class="row justify-content-end">
+                                    <div class="col-md-3">
+                                        <button type="reset" class="btn btn-outline-primary w-100" @onclick="ClearForm">Clear</button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary w-100">Continue</button>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                            </div><!--end col-->
-                        </div><!--end row-->
-                    </div><!--end tab-pane-->
-
-                    <div class="tab-pane fade" id="request-money">
-                        <h4 class="mt-0 header-title mb-3">Request Money</h4>
-
-                    </div><!--end tab-pane-->
-
-                    <div class="tab-pane fade" id="cancel-bill-payment">
-                        <h4 class="mt-0 header-title mb-3">Cancel Bill Payment</h4>
-
-                    </div><!--end tab-pen-->
-
-                    <div class="tab-pane fade" id="pay-multiple-bills">
-                        <h4 class="mt-0 header-title mb-3">Pay Multiple Bills</h4>
-                        <div class="row">
-                            <div class="col-lg-12">
-                            </div> <!--end col-->
-                        </div><!--end row-->
-                    </div><!--end tab-pane-->
-                </div>  <!--end tab-content-->
-            </div><!--end card-body-->
-        </div><!--end card-->
-    </div><!--end col-->
-</div><!--end row-->
 @code {
+    private bool ShowConfirmation = false;
+    private bool ShowSuccess = false;
+    private bool IsLoading = false;
+    private string TransactionId = "";
 
+    private SendMoneyForm Form = new();
+
+    public class SendMoneyForm
+    {
+        [Required(ErrorMessage = "Transfer from is required")]
+        public string TransferFrom { get; set; }
+
+        [Required(ErrorMessage = "Recipient is required")]
+        public string TransferTo { get; set; }
+
+        [Required(ErrorMessage = "Amount is required"), Range(0.01, double.MaxValue, ErrorMessage = "Enter valid amount")]
+        public decimal? Amount { get; set; }
+
+        [Required]
+        public string Currency { get; set; } = "CAD";
+
+        public string Message { get; set; }
+    }
+
+    private void ValidateAndShowSummary()
+    {
+        ShowConfirmation = true;
+    }
+
+    private async Task SubmitTransfer()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        await Task.Delay(3000); // simulate processing
+
+        TransactionId = $"TRX-{DateTime.Now:yyyyMMddHHmmss}";
+        ShowSuccess = true;
+        ShowConfirmation = false;
+        IsLoading = false;
+
+        StateHasChanged();
+    }
+
+    private void ClearForm()
+    {
+        Form = new SendMoneyForm();
+        ShowConfirmation = false;
+        ShowSuccess = false;
+    }
 }

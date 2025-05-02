@@ -652,8 +652,19 @@
     {
         AuthToken = await LocalStorage.GetItemAsync<string>("auth_token") ?? string.Empty;
         ContactId = await LocalStorage.GetItemAsync<string>("user_contactId") ?? string.Empty;
+
         await FetchAccounts();
         await LoadContacts();
+
+        // Set default dates
+        OnceDateTab1 = DateTime.Today;
+        StartDateTab1 = DateTime.Today;
+        EndDateTab1 = DateTime.Today.AddDays(1);
+
+        OnceDateTab2 = DateTime.Today;
+        StartDateTab2 = DateTime.Today;
+        EndDateTab2 = DateTime.Today.AddDays(1);
+
     }
 
     private async Task FetchAccounts()
