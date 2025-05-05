@@ -1,5 +1,13 @@
+@using Blazored.LocalStorage
+@using System.Text.Json
+@using Microsoft.Extensions.Localization
+@layout MainLayout
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject HttpClient Http
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IJSRuntime JS
+@inject IStringLocalizer<AcceInfo_Web.Pages.Index> Localizer
 
 
 <style>
@@ -118,7 +126,7 @@
                 </div>
                 <span class="online-icon"><i class="mdi mdi-record text-success"></i></span>
                 <div class="media-body">
-                    <h5 class="text-light">Welcome, @FirstName @LastName</h5>
+                    <h5 class="text-light">@(Localizer["WelcomeText"].ResourceNotFound ? "Missing" : Localizer["WelcomeText"]), @FirstName @LastName</h5>
                     <ul class="list-unstyled list-inline mb-0 mt-2">
                         <li class="list-inline-item">
                             <a href="#"><i class="mdi mdi-account text-light"></i></a>
@@ -138,13 +146,13 @@
                 <div class="col-sm-12">
                     <div class="page-title-box">
                         <div class="float-right align-item-center mt-2">
-                            <button class="btn btn-primary px-4 align-self-center report-btn">Contact Us</button>
+                            <button class="btn btn-primary px-4 align-self-center report-btn">@(Localizer["ContactUs"].ResourceNotFound ? "Missing" : Localizer["ContactUs"])</button>
                         </div>
-                        <h4 class="page-title mb-2"><i class="mdi mdi-account mr-2"></i>Accounts Summary</h4>
+                        <h4 class="page-title mb-2"><i class="mdi mdi-account mr-2"></i>@(Localizer["AccountSummary"].ResourceNotFound ? "Missing" : Localizer["AccountSummary"])</h4>
                         <div>
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="#">My Accounts</a></li>
-                                <li class="breadcrumb-item"><a href="#">Accounts Summary</a></li>
+                                <li class="breadcrumb-item"><a href="#">@(Localizer["MyAccounts"].ResourceNotFound ? "Missing" : Localizer["MyAccounts"])</a></li>
+                                <li class="breadcrumb-item"><a href="#">@(Localizer["AccountSummary"].ResourceNotFound ? "Missing" : Localizer["AccountSummary"])</a></li>
                             </ol>
                         </div>
                     </div>
