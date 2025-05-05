@@ -117,7 +117,141 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ACCERewards" xml:space="preserve">
+    <value>ACCE Rewards</value>
+  </data>
+  <data name="ApplyforCreditCard" xml:space="preserve">
+    <value>Apply for a Credit Card</value>
+  </data>
+  <data name="BankAccountsSummary" xml:space="preserve">
+    <value>Bank Accounts Summary</value>
+  </data>
+  <data name="CreditCards" xml:space="preserve">
+    <value>CreditCards</value>
+  </data>
+  <data name="CreditCardSummary" xml:space="preserve">
+    <value>Credit Card Summary</value>
+  </data>
+  <data name="GoodMorningText" xml:space="preserve">
+    <value>Good Morning</value>
+  </data>
+  <data name="OpenNewAccount" xml:space="preserve">
+    <value>Open New Account</value>
+  </data>
+  <data name="ViewOffer" xml:space="preserve">
+    <value>View Offer</value>
+  </data>
   <data name="WelcomeText" xml:space="preserve">
     <value>Welcome</value>
+  </data>
+  <data name="BankAccounts" xml:space="preserve">
+    <value>Bank Accounts</value>
+  </data>
+  <data name="FinancialInsights" xml:space="preserve">
+    <value>Financial Insights</value>
+  </data>
+  <data name="NoBankAccountsFound" xml:space="preserve">
+    <value>No bank accounts found.</value>
+  </data>
+  <data name="GoToACCEBusinessBanking" xml:space="preserve">
+    <value>Go to ACCE Business Banking</value>
+  </data>
+  <data name="Documents" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="Messages-Alerts" xml:space="preserve">
+    <value>Messages/ Alerts</value>
+  </data>
+  <data name="Offers" xml:space="preserve">
+    <value>Offers</value>
+  </data>
+  <data name="Banking" xml:space="preserve">
+    <value>Baking</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>Alerts</value>
+  </data>
+  <data name="ForYou" xml:space="preserve">
+    <value>For You</value>
+  </data>
+  <data name="Beyond" xml:space="preserve">
+    <value>Beyond</value>
+  </data>
+  <data name="PointsText" xml:space="preserve">
+    <value>Get 30,000 points on a new ACCE Avion Visa</value>
+  </data>
+  <data name="PointsSubText" xml:space="preserve">
+    <value>When you open your first ACCE Avion Visa Credit Card Account by July 31, 2019.</value>
+  </data>
+  <data name="eBills" xml:space="preserve">
+    <value>eBills</value>
+  </data>
+  <data name="UtilityBillSavings" xml:space="preserve">
+    <value>Utility Bill Savings</value>
+  </data>
+  <data name="UtilityBillSavingsSubtext" xml:space="preserve">
+    <value>Your utility expenses are down 15% this month. Great job conserving energy!</value>
+  </data>
+  <data name="Dining Expenses Rising" xml:space="preserve">
+    <value>Dining Expenses Rising</value>
+  </data>
+  <data name="Dining Expenses Rising Subtext" xml:space="preserve">
+    <value>Your spending on dining has increased by 20% this month compared to your average.
+</value>
+  </data>
+  <data name="RecurringSubscription" xml:space="preserve">
+    <value>Recurring Subscription</value>
+  </data>
+  <data name="RecurringSubscriptionSubtext" xml:space="preserve">
+    <value>We detected a new $12.99 monthly charge from StreamFlix starting this month.
+</value>
+  </data>
+  <data name="InvestmentSummary" xml:space="preserve">
+    <value>Investment Summary</value>
+  </data>
+  <data name="Investments" xml:space="preserve">
+    <value>Investments</value>
+  </data>
+  <data name="PurchaseInvestment" xml:space="preserve">
+    <value>Purchase an Investment</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="MortgageSummary" xml:space="preserve">
+    <value>Mortgage Summary</value>
+  </data>
+  <data name="Mortgage" xml:space="preserve">
+    <value>Mortgage</value>
+  </data>
+  <data name="MortgageSubtext" xml:space="preserve">
+    <value>Start a Mortgage pre-approval</value>
+  </data>
+  <data name="MortgageValueText" xml:space="preserve">
+    <value>How much is my home worth?</value>
+  </data>
+  <data name="AccountSummary" xml:space="preserve">
+    <value>Account Summary</value>
+  </data>
+  <data name="ContactUs" xml:space="preserve">
+    <value>Contact Us</value>
+  </data>
+  <data name="MyAccounts" xml:space="preserve">
+    <value>My Accounts</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Products &amp; Services" xml:space="preserve">
+    <value>Products &amp; Services</value>
+  </data>
+  <data name="ProfileAccountSettings" xml:space="preserve">
+    <value>Profile &amp; Account Settings</value>
+  </data>
+  <data name="PaySendReceiveMoney" xml:space="preserve">
+    <value>Pay, Send &amp; Receive Money</value>
   </data>
 </root>
