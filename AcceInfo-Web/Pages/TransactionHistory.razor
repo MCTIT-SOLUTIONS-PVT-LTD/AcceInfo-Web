@@ -33,7 +33,7 @@
                                                     <option value="">-- Select Account --</option>
                                                     @foreach (var acc in Accounts)
                                                     {
-                                                        <option value="@acc.AccountId">@acc.AccountName - @acc.AccountNumber</option>
+                                                        <option value="@acc.AccountId">@acc.AccountName - @acc.AccountCategoryName - @acc.AccountNumber</option>
                                                     }
                                                 </select>
                                             </div>

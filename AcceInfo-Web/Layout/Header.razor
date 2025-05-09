@@ -37,7 +37,10 @@
                 </a>
             </div>
 
+            
+
             <ul class="list-unstyled topbar-nav float-right mb-0">
+
                 <li class="dropdown">
                     <a class="nav-link dropdown-toggle arrow-none waves-light waves-effect" data-toggle="dropdown" href="#" role="button"
                        aria-haspopup="false" aria-expanded="false">
@@ -89,6 +92,18 @@
                     </form>
                 </li>
             </ul>
+
+            @* <ul class="list-unstyled topbar-nav mb-0 float-right">
+                <li class="">
+                    <select class="form-control form-control-sm"
+                            style="width: 120px; margin-top: 15px;"
+                            value="@SelectedLanguage"
+                            @onchange="ChangeLanguage">
+                        <option value="en-US">English</option>
+                        <option value="fr-FR">French</option>
+                    </select>
+                </li>
+            </ul> *@
         </nav>
     </div>
 
@@ -168,8 +183,14 @@
     private string LastName = "";
     private string BackgroundColor;
 
+    private string SelectedLanguage = "en-US";
+
     protected override async Task OnInitializedAsync()
     {
+        var lang = await LocalStorage.GetItemAsync<string>("user_lang");
+        SelectedLanguage = !string.IsNullOrEmpty(lang) ? lang : "en-US";
+
+
         var name = await LocalStorage.GetItemAsync<string>("user_name");
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -186,6 +207,13 @@
         }
 
         BackgroundColor = GetRandomColor();
+    }
+
+    private async Task ChangeLanguage(ChangeEventArgs e)
+    {
+        SelectedLanguage = e.Value?.ToString() ?? "en-US";
+        await LocalStorage.SetItemAsync("user_lang", SelectedLanguage);
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
     private string GetRandomColor()

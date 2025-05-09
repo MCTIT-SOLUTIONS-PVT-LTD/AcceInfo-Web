@@ -7,7 +7,7 @@ using Microsoft.JSInterop;
 using System.Globalization;
 
 // ✅ Set static culture (e.g., "fr")
-var culture = new CultureInfo("fr-FR"); // Change to "en" to test English
+var culture = new CultureInfo("fr-FR"); // Change to "fr-FR en-US" to test English
 CultureInfo.DefaultThreadCurrentCulture = culture;
 CultureInfo.DefaultThreadCurrentUICulture = culture;
 
