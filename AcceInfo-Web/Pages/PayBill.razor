@@ -147,7 +147,7 @@
                                                                                 <option value="">Select</option>
                                                                                 @foreach (var account in Accounts)
                                                                                 {
-                                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                                                    <option value="@account.AccountId">@account.AccountName - @account.AccountCategoryName - @account.AccountNumber = @account.Balance.ToString("C")</option>
                                                                                 }
                                                                             </select>
                                                                             <ValidationMessage For="@(() => Model.AccountId)" class="text-danger" />
@@ -619,6 +619,7 @@
         public string AccountName { get; set; } 
         public string AccountNumber { get; set; } 
         public decimal Balance { get; set; } 
+        public string AccountCategoryName { get; set; }
     }
 
 

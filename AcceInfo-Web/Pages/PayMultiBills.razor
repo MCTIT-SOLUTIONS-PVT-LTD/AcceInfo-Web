@@ -46,7 +46,12 @@
                                                                     <h5 class="mb-0"><i class="fas fa-receipt"></i> Payment Receipt</h5>
                                                                 </div>
                                                                 <div class="card-body">
-                                                                    <p class="text-success">Your bills have been paid successfully. Below is a summary of the transaction.</p>
+                                                                     <div class="text-center text-success">
+                                                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                                                        <h5 class="font-weight-bold">Pay a Bill Successful!</h5>
+                                                                        <p>@DateTime.Now.ToString("MMM dd, yyyy 'at' h:mm tt") ET</p>
+                                                                    </div>
+                                                                    @* <p class="text-success">Your bills have been paid successfully. Below is a summary of the transaction.</p> *@
 
                                                                     <dl class="row">
                                                                         <dt class="col-sm-4">From Account:</dt>
@@ -140,7 +145,7 @@
                                                                                             <option value="">Select</option>
                                                                                             @foreach (var account in Accounts)
                                                                                             {
-                                                                                                <option value="@account.AccountId">@account.AccountName - @account.AccountNumber = @account.Balance.ToString("C")</option>
+                                                                                                <option value="@account.AccountId">@account.AccountName - @account.AccountCategoryName - @account.AccountNumber = @account.Balance.ToString("C")</option>
                                                                                             }
                                                                                         </select>
                                                                                     </div>
@@ -490,8 +495,17 @@
         IsLoading = true;
         StateHasChanged();
 
-        var hasEmpty = BillPayees.Any(p => string.IsNullOrWhiteSpace(p.PayeeId) || string.IsNullOrWhiteSpace(p.Amount));
-        var hasDuplicate = BillPayees.Select(p => p.PayeeId).Where(x => !string.IsNullOrWhiteSpace(x)).GroupBy(x => x).Any(g => g.Count() > 1);
+        var hasEmpty = BillPayees.Any(p =>
+            string.IsNullOrWhiteSpace(p.PayeeId) ||
+            string.IsNullOrWhiteSpace(p.Amount) ||
+            !decimal.TryParse(p.Amount, out var amt) || amt <= 0
+        );
+
+        var hasDuplicate = BillPayees
+            .Select(p => p.PayeeId)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .GroupBy(x => x)
+            .Any(g => g.Count() > 1);
 
         if (string.IsNullOrWhiteSpace(SelectedTransferFrom))
         {
@@ -499,7 +513,7 @@
         }
         else if (hasEmpty)
         {
-            JS.InvokeVoidAsync("alert", "Please select all payees and enter valid amounts.");
+            JS.InvokeVoidAsync("alert", "Please select all payees and enter valid amounts greater than 0.");
         }
         else if (hasDuplicate)
         {
@@ -629,6 +643,7 @@
         public string AccountName { get; set; }
         public string AccountNumber { get; set; }
         public decimal Balance { get; set; }
+        public string AccountCategoryName { get; set; }
     }
 
 
@@ -716,8 +731,7 @@
     private async Task HandlePayeeSubmit()
     {
 
-        IsLoading = true;
-        StateHasChanged();
+       
 
         ShowPayeeNameError = string.IsNullOrWhiteSpace(newPayee.PayeeName);
         ShowPayeeTypeError = string.IsNullOrWhiteSpace(newPayee.PayeeType);
@@ -725,6 +739,9 @@
 
         if (ShowPayeeNameError || ShowPayeeTypeError || ShowPayeeNumberError)
             return;
+        
+        IsLoading = true;
+        StateHasChanged();
 
         try
         {
